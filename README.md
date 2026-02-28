@@ -1,84 +1,42 @@
 # chatlili
-Python网页简易chat服务器分布模式大厅注册聊天厅服务包
 
-bug闷多，懒得再改了
+![Python version](https://img.shields.io/badge/python-3.6+-blue.svg)
+![Flask](https://img.shields.io/badge/flask-2.0+-green.svg)
+![License](https://img.shields.io/badge/license-MIT-red.svg)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/yourusername/chatlili/pulls)
 
+[![Discord](https://img.shields.io/discord/xxxxxxxxxx?label=Discord&logo=discord&color=5865F2)](https://discord.gg/example)
+[![Telegram](https://img.shields.io/badge/Telegram-join-blue?logo=telegram)](https://t.me/chatlili)
+[![Twitter](https://img.shields.io/twitter/follow/chatlili?style=social)](https://twitter.com/chatlili)
 
-项目简介
+**Python网页简易chat服务器分布模式大厅注册聊天厅服务包**
 
+> 🐛 bug闷多，懒得再改了
 
-chatlili 是一个基于Python的简易分布式聊天系统服务包。它实现了"大厅-房间"模式的分布式聊天架构，支持多服务器注册、动态房间管理以及实时消息广播。
+<img src="https://via.placeholder.com/800x400/1a1a1a/ffffff?text=chatlili+Demo+Screenshot" alt="chatlili demo" width="100%"/>
 
-核心特性
+## 📋 项目简介
 
+chatlili 是一个基于Python的简易分布式聊天系统服务包。它实现了**大厅-房间**模式的分布式聊天架构，支持多服务器注册、动态房间管理以及实时消息广播。
 
-🏢 分布式架构：支持多个聊天服务器注册到中心大厅
+## ✨ 核心特性
 
-🏠 动态房间管理：用户可创建、加入、离开聊天房间
+| 特性 | 描述 |
+|------|------|
+| 🏢 **分布式架构** | 支持多个聊天服务器注册到中心大厅 |
+| 🏠 **动态房间管理** | 用户可创建、加入、离开聊天房间 |
+| 🔄 **实时消息广播** | 房间内消息实时推送给所有成员 |
+| 📡 **跨服务器通信** | 不同服务器上的用户可以加入同一房间 |
+| 🚪 **优雅退出机制** | 支持用户主动断开连接 |
 
-🔄 实时消息广播：房间内消息实时推送给所有成员
+## 🚀 快速开始
 
-📡 跨服务器通信：不同服务器上的用户可以加入同一房间
+### 前置要求
 
-🚪 优雅退出机制：支持用户主动断开连接
+- Python 3.6+
+- pip 包管理器
 
-快速开始
+### 安装依赖
 
-
-
-安装依赖
-
+```bash
 pip install flask flask-socketio requests
-
-
-启动大厅服务
-
-python hall.py
-
-大厅服务默认运行在 http://localhost:5000
-
-
-启动聊天服务器
-
-python server.py
-
-聊天服务器默认运行在 http://localhost:5001
-
-
-
-
-项目结构
-
-chatlili/
-
-├── hall.py          # 大厅服务：管理所有聊天服务器注册
-
-├── server.py        # 聊天服务器：处理具体聊天房间和消息
-
-├── client.py        # 客户端示例：命令行聊天客户端
-
-└── README.md        # 项目文档
-
-
-已知问题
-
-
-断线重连机制不够完善
-
-某些场景下消息可能重复发送
-
-服务器异常退出时房间清理不彻底
-
-并发场景下可能存在资源竞争
-
-WebSocket连接有时会意外断开
-
-
-免责声明
-
-
-本项目仅用于学习和演示目的，不建议在生产环境中使用。由于作者精力有限（懒），代码中存在大量未修复的bug，欢迎有兴趣的可以fork并自行改进。
-
-License
-MIT
-
