@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>盒子 - ChatLili</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #36393e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .box-container {
+            max-width: 1000px;
+            width: 95%;
+            margin: 20px auto;
+        }
+        
+        .box-dialog {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        
+        /* 头部样式 */
+        .box-header {
+            background: #36393f;
+            padding: 16px 20px;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* 返回按钮 - 圆形 */
+        .back-btn {
+            background: #40444b;
+            color: #b9bbbe;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+            padding: 0;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        
+        .back-btn:hover {
+            background: #5865f2;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .box-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .box-title span {
+            font-size: 24px;
+        }
+        
+        .header-right {
+            width: 40px; /* 保持对称 */
+        }
+        
+        /* 标签页导航 */
+        .box-tabs {
+            display: flex;
+            gap: 2px;
+            background: #2f3136;
+            border-bottom: 1px solid #40444b;
+            padding: 0 16px;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #40444b #2f3136;
+        }
+        
+        .box-tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .box-tabs::-webkit-scrollbar-track {
+            background: #2f3136;
+        }
+        
+        .box-tabs::-webkit-scrollbar-thumb {
+            background: #40444b;
+            border-radius: 4px;
+        }
+        
+        .box-tab {
+            padding: 14px 20px;
+            color: #b9bbbe;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+        
+        .box-tab:hover {
+            color: #fff;
+        }
+        
+        .box-tab.active {
+            color: #fff;
+            border-bottom-color: #5865f2;
+        }
+        
+        /* 内容区域 */
+        .box-content {
+            padding: 24px;
+            background: #36393f;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        /* 功能卡片网格 */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .feature-card {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card:hover {
+            border-color: #5865f2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .feature-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .feature-card.disabled:hover {
+            border-color: #40444b;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        
+        .feature-name {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .feature-badge {
+            background: #5865f2;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+        
+        .feature-badge.coming {
+            background: #4f545c;
+        }
+        
+        .feature-desc {
+            color: #b9bbbe;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            min-height: 40px;
+        }
+        
+        .feature-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #72767d;
+        }
+        
+        .feature-meta span {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        /* 功能详情区域 */
+        .feature-detail {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            display: none;
+        }
+        
+        .feature-detail.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #40444b;
+        }
+        
+        .detail-icon {
+            font-size: 48px;
+            background: #40444b;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .detail-title {
+            flex: 1;
+        }
+        
+        .detail-name {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .detail-status {
+            color: #b9bbbe;
+            font-size: 14px;
+        }
+        
+        .detail-content {
+            color: #dcddde;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .detail-content p {
+            margin-bottom: 16px;
+        }
+        
+        .detail-content ul {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+        
+        .detail-content li {
+            margin-bottom: 8px;
+            color: #b9bbbe;
+        }
+        
+        .detail-content code {
+            background: #40444b;
+            color: #5865f2;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .detail-actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .action-btn.primary {
+            background: #5865f2;
+            color: white;
+        }
+        
+        .action-btn.primary:hover {
+            background: #4752c4;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn.secondary {
+            background: #4f545c;
+            color: white;
+        }
+        
+        .action-btn.secondary:hover {
+            background: #5d6269;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 开发中占位符 */
+        .coming-soon {
+            text-align: center;
+            padding: 60px 20px;
+            color: #72767d;
+        }
+        
+        .coming-soon span {
+            font-size: 64px;
+            display: block;
+            margin-bottom: 20px;
+        }
+        
+        .coming-soon h3 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .coming-soon p {
+            font-size: 14px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #72767d;
+            background: #2f3136;
+            border-radius: 12px;
+            border: 2px dashed #40444b;
+        }
+        
+        .empty-state span {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 16px;
+        }
+        
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            color: #72767d;
+            padding: 40px;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-left: 8px;
+            border: 2px solid #5865f2;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .box-container {
+                width: 100%;
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .box-dialog {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            .box-header {
+                padding: 12px 16px;
+            }
+            
+            .box-title {
+                font-size: 18px;
+            }
+            
+            .box-tabs {
+                padding: 0 8px;
+            }
+            
+            .box-tab {
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+            
+            .box-content {
+                padding: 16px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .detail-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="box-container">
+        <div class="box-dialog">
+            <!-- 头部 -->
+            <div class="box-header">
+                <div class="header-left">
+                    <button class="back-btn" onclick="goBack()" title="返回">←</button>
+                    <div class="box-title">
+                        <span>📦</span> 盒子
+                    </div>
+                </div>
+                <div class="header-right"></div>
+            </div>
+            
+            <!-- 标签页导航 -->
+            <div class="box-tabs" id="boxTabs">
+                <div class="box-tab active" onclick="switchTab('all')">全部</div>
+                <div class="box-tab" onclick="switchTab('tools')">工具</div>
+                <div class="box-tab" onclick="switchTab('games')">游戏</div>
+                <div class="box-tab" onclick="switchTab('other')">其他</div>
+            </div>
+            
+            <!-- 内容区域 -->
+            <div class="box-content" id="boxContent">
+                <!-- 功能卡片网格 - 动态生成 -->
+                <div class="features-grid" id="featuresGrid"></div>
+                
+                <!-- 功能详情区域 -->
+                <div id="featureDetail" class="feature-detail"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 返回函数 - 直接返回首页 =====
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        // ===== 功能数据 =====
+        const features = {
+            // 工具类
+            tools: [
+                {
+                    id: 'calculator',
+                    name: '计算器',
+                    icon: '🧮',
+                    category: 'tools',
+                    status: '开发中',
+                    badge: '即将上线',
+                    description: '简单易用的计算器，支持基础运算和科学计算',
+                    details: {
+                        desc: '一个功能完善的计算器工具，支持：',
+                        features: [
+                            '基础运算：加减乘除、括号',
+                            '科学计算：三角函数、对数、指数',
+                            '历史记录：保存最近的计算结果',
+                            '单位换算：长度、重量、温度等'
+                        ],
+                        coming: true
+                    }
+                },
+                {
+                    id: 'translate',
+                    name: '翻译',
+                    icon: '🌐',
+                    category: 'tools',
+                    status: '规划中',
+                    badge: '即将上线',
+                    description: '多语言翻译，支持文本和语音',
+                    details: {
+                        desc: '简单便捷的翻译工具：',
+                        features: [
+                            '支持中英日韩等多国语言',
+                            '文本翻译、语音输入',
+                            '常用短语收藏',
+                            '离线词库'
+                        ],
+                        coming: true
+                    }
+                }
+            ],
+            
+            // 游戏类
+            games: [
+                {
+                    id: 'minecraft',
+                    name: 'Minecraft基岩版联机厅',
+                    icon: '⛏️',
+                    category: 'games',
+                    status: '可用',
+                    badge: '在线',
+                    description: '查询 Minecraft 服务器状态、在线玩家、房间信息',
+                    details: {
+                        desc: 'Minecraft 服务器状态查询工具，支持：',
+                        features: [
+                            '查看所有在线房间列表',
+                            '查询服务器账号信息',
+                            '获取玩家个人资料',
+                            '查看房间内玩家详情'
+                        ],
+                        coming: false // 不是开发中
+                    }
+                }
+            ],
+            
+            // 其他类
+            other: [
+                {
+                    id: 'calendar',
+                    name: '日历',
+                    icon: '📅',
+                    category: 'other',
+                    status: '规划中',
+                    badge: '即将上线',
+                    description: '日历查看，节假日提醒',
+                    details: {
+                        desc: '实用的日历工具：',
+                        features: [
+                            '农历、公历对照',
+                            '节假日显示',
+                            '日程添加',
+                            '提醒功能'
+                        ],
+                        coming: true
+                    }
+                },
+                {
+                    id: 'timer',
+                    name: '计时器',
+                    icon: '⏱️',
+                    category: 'other',
+                    status: '规划中',
+                    badge: '即将上线',
+                    description: '倒计时、秒表',
+                    details: {
+                        desc: '多功能计时工具：',
+                        features: [
+                            '倒计时功能',
+                            '秒表计时',
+                            '多任务计时'
+                        ],
+                        coming: true
+                    }
+                }
+            ]
+        };
+        
+        let currentTab = 'all';
+        let currentFeature = null;
+        
+        // ===== 初始化 =====
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFeatures();
+        });
+        
+        // ===== 切换标签页 =====
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // 更新标签页样式
+            document.querySelectorAll('.box-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 重新加载功能列表
+            loadFeatures();
+        }
+        
+        // ===== 加载功能列表 =====
+        function loadFeatures() {
+            const grid = document.getElementById('featuresGrid');
+            const detail = document.getElementById('featureDetail');
+            
+            // 隐藏详情区域
+            detail.classList.remove('show');
+            currentFeature = null;
+            
+            // 收集所有要显示的功能
+            let displayFeatures = [];
+            
+            if (currentTab === 'all') {
+                // 合并所有分类
+                displayFeatures = [
+                    ...features.tools,
+                    ...features.games,
+                    ...features.other
+                ];
+            } else {
+                displayFeatures = features[currentTab] || [];
+            }
+            
+            if (displayFeatures.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <span>📭</span>
+                        <p>暂无功能</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 生成卡片HTML
+            let html = '';
+            displayFeatures.forEach(feature => {
+                // 为可用功能添加特殊样式，但不禁用
+                const cardClass = feature.details.coming ? 'feature-card disabled' : 'feature-card';
+                
+                html += `
+                    <div class="${cardClass}" onclick="showFeatureDetail('${feature.id}')">
+                        <div class="feature-icon">${feature.icon}</div>
+                        <div class="feature-name">
+                            ${feature.name}
+                            <span class="feature-badge ${feature.details.coming ? 'coming' : ''}">${feature.badge}</span>
+                        </div>
+                        <div class="feature-desc">${feature.description}</div>
+                        <div class="feature-meta">
+                            <span>📊 ${feature.status}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
+        }
+        
+        // ===== 显示功能详情 =====
+        function showFeatureDetail(featureId) {
+            // 查找功能
+            let feature = null;
+            for (const category in features) {
+                const found = features[category].find(f => f.id === featureId);
+                if (found) {
+                    feature = found;
+                    break;
+                }
+            }
+            
+            if (!feature) return;
+            
+            // 如果是 Minecraft 功能且可用，直接跳转到 box/minecraft.html
+            if (feature.id === 'minecraft' && !feature.details.coming) {
+                window.location.href = 'box/minecraft.html';
+                return;
+            }
+            
+            currentFeature = feature;
+            
+            const detail = document.getElementById('featureDetail');
+            const grid = document.getElementById('featuresGrid');
+            
+            // 生成详情HTML
+            let featuresHtml = '';
+            if (feature.details.features) {
+                featuresHtml = '<ul>' + feature.details.features.map(f => `<li>${f}</li>`).join('') + '</ul>';
+            }
+            
+            // 根据是否可用显示不同的按钮
+            let actionButtons = '';
+            if (feature.details.coming) {
+                actionButtons = `
+                    <button class="action-btn primary" disabled>立即使用</button>
+                    <button class="action-btn secondary" onclick="hideFeatureDetail()">返回</button>
+                `;
+            } else {
+                actionButtons = `
+                    <button class="action-btn primary" onclick="window.location.href='box/minecraft.html'">立即使用</button>
+                    <button class="action-btn secondary" onclick="hideFeatureDetail()">返回</button>
+                `;
+            }
+            
+            detail.innerHTML = `
+                <div class="detail-header">
+                    <div class="detail-icon">${feature.icon}</div>
+                    <div class="detail-title">
+                        <div class="detail-name">${feature.name}</div>
+                        <div class="detail-status">
+                            <span class="feature-badge ${feature.details.coming ? 'coming' : ''}">${feature.badge}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-content">
+                    <p>${feature.details.desc}</p>
+                    ${featuresHtml}
+                    ${feature.details.coming ? `
+                    <div class="coming-soon" style="margin-top: 30px;">
+                        <span>🚧</span>
+                        <h3>功能开发中</h3>
+                        <p>该功能正在紧张开发中，敬请期待！</p>
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="detail-actions">
+                    ${actionButtons}
+                </div>
+            `;
+            
+            // 显示详情，隐藏网格
+            grid.style.display = 'none';
+            detail.classList.add('show');
+        }
+        
+        // ===== 隐藏功能详情 =====
+        function hideFeatureDetail() {
+            const detail = document.getElementById('featureDetail');
+            const grid = document.getElementById('featuresGrid');
+            
+            detail.classList.remove('show');
+            grid.style.display = 'grid';
+            currentFeature = null;
+        }
+        
+        // ===== HTML转义 =====
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+    
+    <!-- 统一心跳管理 -->
+    <script src="heartbeat.js"></script>
+</body>
+</html>

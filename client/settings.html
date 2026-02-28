@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人设置 - ChatLili</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #36393e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .settings-container {
+            max-width: 600px;
+            width: 90%;
+            margin: 20px auto;
+        }
+        
+        .settings-dialog {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        
+        .dialog-header {
+            background: #36393f;
+            padding: 20px 24px;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .dialog-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .dialog-btn {
+            background: #40444b;
+            color: #b9bbbe;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+        
+        .dialog-btn:hover {
+            background: #5865f2;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .settings-content {
+            padding: 30px;
+        }
+        
+        .settings-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #40444b;
+        }
+        
+        .settings-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .section-title {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 头像设置 */
+        .avatar-section {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .current-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 40px;
+            background-size: cover;
+            background-position: center;
+            border: 3px solid #40444b;
+        }
+        
+        .avatar-upload {
+            flex: 1;
+        }
+        
+        .avatar-upload input[type="file"] {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: #5865f2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .upload-btn:hover {
+            background: #4752c4;
+        }
+        
+        .upload-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .upload-hint {
+            color: #72767d;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        
+        /* 背景图片设置 */
+        .background-section {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .current-background {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            background: #40444b;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid #40444b;
+        }
+        
+        .background-upload {
+            flex: 1;
+        }
+        
+        .background-upload input[type="file"] {
+            display: none;
+        }
+        
+        /* 签名设置 */
+        .signature-section {
+            margin-top: 20px;
+        }
+        
+        .signature-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #40444b;
+            border: 1px solid #202225;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            box-sizing: border-box;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .signature-input:focus {
+            border-color: #5865f2;
+            box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.2);
+        }
+        
+        .signature-hint {
+            color: #72767d;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        
+        /* 按钮 */
+        .btn-save {
+            background: #5865f2;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .btn-save:hover {
+            background: #4752c4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+        }
+        
+        .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* 消息提示 */
+        .success-message {
+            color: #3ba55d;
+            text-align: center;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(59,165,93,0.1);
+            border-radius: 12px;
+            display: none;
+            font-size: 14px;
+            border: 1px solid rgba(59,165,93,0.3);
+        }
+        
+        .error-message {
+            color: #f04747;
+            text-align: center;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(240,71,71,0.1);
+            border-radius: 12px;
+            display: none;
+            font-size: 14px;
+            border: 1px solid rgba(240,71,71,0.3);
+        }
+        
+        /* 进度条 */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #40444b;
+            border-radius: 2px;
+            margin: 15px 0 5px;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #5865f2;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        /* 加载遮罩 */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #40444b;
+            border-top-color: #5865f2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        .loading-text {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 服务器状态 */
+        .server-status {
+            background: #40444b;
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            color: #b9bbbe;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-dot.online {
+            background: #3ba55d;
+            box-shadow: 0 0 8px #3ba55d;
+        }
+        
+        .status-dot.offline {
+            background: #f04747;
+        }
+        
+        /* 信息卡片 */
+        .info-card {
+            background: #36393f;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #40444b;
+        }
+        
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #40444b;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #b9bbbe;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #fff;
+            font-weight: 500;
+            font-size: 14px;
+            background: #40444b;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-family: monospace;
+        }
+        
+        @media (max-width: 768px) {
+            .avatar-section, .background-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载遮罩层 -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在保存...</div>
+    </div>
+
+    <div class="settings-container">
+        <div class="settings-dialog">
+            <div class="dialog-header">
+                <button class="dialog-btn" onclick="goBack()">←</button>
+                <span class="dialog-title">个人设置</span>
+                <button class="dialog-btn" onclick="goToSecurity()">🔒</button>
+            </div>
+            
+            <div class="settings-content">
+                <!-- 服务器状态 -->
+                <div class="server-status" id="serverStatus">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">检查大厅服务器状态...</span>
+                </div>
+                
+                <!-- 用户信息卡片 -->
+                <div class="info-card">
+                    <div class="info-row">
+                        <span class="info-label">UID</span>
+                        <span class="info-value" id="displayUid">加载中...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">用户名</span>
+                        <span class="info-value" id="displayUsername">加载中...</span>
+                    </div>
+                </div>
+                
+                <!-- 头像设置 -->
+                <div class="settings-section">
+                    <div class="section-title">
+                        <span>🖼️</span> 头像设置
+                    </div>
+                    <div class="avatar-section">
+                        <div id="currentAvatar" class="current-avatar">?</div>
+                        <div class="avatar-upload">
+                            <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar()">
+                            <button class="upload-btn" onclick="document.getElementById('avatarInput').click()" id="avatarBtn">
+                                <span>📷</span> 选择头像
+                            </button>
+                            <div class="upload-hint">支持 JPG、PNG、GIF，最大 2MB</div>
+                            <div id="avatarProgress" class="progress-bar">
+                                <div id="avatarProgressFill" class="progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 背景图片设置 -->
+                <div class="settings-section">
+                    <div class="section-title">
+                        <span>🌄</span> 背景图片
+                    </div>
+                    <div class="background-section">
+                        <div id="currentBackground" class="current-background"></div>
+                        <div class="background-upload">
+                            <input type="file" id="backgroundInput" accept="image/*" onchange="previewBackground()">
+                            <button class="upload-btn" onclick="document.getElementById('backgroundInput').click()">
+                                <span>📷</span> 选择背景
+                            </button>
+                            <div class="upload-hint">支持 JPG、PNG、GIF，最大 5MB，比例16:9最佳</div>
+                            <div id="backgroundProgress" class="progress-bar">
+                                <div id="backgroundProgressFill" class="progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 签名设置 -->
+                <div class="settings-section">
+                    <div class="section-title">
+                        <span>📝</span> 个人签名
+                    </div>
+                    <div class="signature-section">
+                        <textarea id="signature" class="signature-input" placeholder="写点什么让大家认识你吧..."></textarea>
+                        <div class="signature-hint">签名会显示在你的个人主页上</div>
+                    </div>
+                </div>
+                
+                <div id="successMessage" class="success-message"></div>
+                <div id="errorMessage" class="error-message"></div>
+                
+                <button class="btn-save" onclick="saveSettings()" id="saveBtn">保存设置</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 全局变量 =====
+        const LOBBY_URL = window.location.origin;
+        let uid = null;
+        let username = null;
+        let selectedAvatar = null;
+        let selectedBackground = null;
+        let originalSignature = '';
+        
+        // ===== Cookie 工具函数 =====
+        function getCookie(name) {
+            const cookieName = name + "=";
+            const cookies = document.cookie.split(';');
+            for(let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.indexOf(cookieName) === 0) {
+                    return cookie.substring(cookieName.length, cookie.length);
+                }
+            }
+            return "";
+        }
+        
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+        
+        function deleteCookie(name) {
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+        
+        // ===== 页面导航 =====
+        function goBack() {
+            const platform = detectPlatform();
+            if (platform === 'mobile') {
+                window.location.href = `profile.html?uid=${uid}&username=${encodeURIComponent(username)}`;
+            } else {
+                window.location.href = `pc-profile.html?uid=${uid}&username=${encodeURIComponent(username)}`;
+            }
+        }
+        
+        function goToSecurity() {
+            window.location.href = `security.html?uid=${uid}&username=${encodeURIComponent(username)}`;
+        }
+        
+        function detectPlatform() {
+            const ua = navigator.userAgent.toLowerCase();
+            return /mobile|android|iphone|ipad|phone/i.test(ua) ? 'mobile' : 'pc';
+        }
+        
+        // ===== 头像预览 =====
+        function previewAvatar() {
+            const input = document.getElementById('avatarInput');
+            if (input.files && input.files[0]) {
+                selectedAvatar = input.files[0];
+                
+                if (selectedAvatar.size > 2 * 1024 * 1024) {
+                    showError('头像不能超过2MB');
+                    input.value = '';
+                    selectedAvatar = null;
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('currentAvatar').style.backgroundImage = `url(${e.target.result})`;
+                    document.getElementById('currentAvatar').style.backgroundSize = 'cover';
+                    document.getElementById('currentAvatar').style.backgroundPosition = 'center';
+                    document.getElementById('currentAvatar').textContent = '';
+                };
+                reader.readAsDataURL(selectedAvatar);
+            }
+        }
+        
+        // ===== 背景预览 =====
+        function previewBackground() {
+            const input = document.getElementById('backgroundInput');
+            if (input.files && input.files[0]) {
+                selectedBackground = input.files[0];
+                
+                if (selectedBackground.size > 5 * 1024 * 1024) {
+                    showError('背景图片不能超过5MB');
+                    input.value = '';
+                    selectedBackground = null;
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('currentBackground').style.backgroundImage = `url(${e.target.result})`;
+                };
+                reader.readAsDataURL(selectedBackground);
+            }
+        }
+        
+        // ===== 检查服务器状态 =====
+        async function checkServerStatus() {
+            try {
+                const res = await fetch(`${LOBBY_URL}/servers`, { timeout: 3000 });
+                if (res.ok) {
+                    document.getElementById('statusDot').className = 'status-dot online';
+                    document.getElementById('statusText').textContent = '大厅服务器在线';
+                } else {
+                    document.getElementById('statusDot').className = 'status-dot offline';
+                    document.getElementById('statusText').textContent = '大厅服务器异常';
+                }
+            } catch (e) {
+                document.getElementById('statusDot').className = 'status-dot offline';
+                document.getElementById('statusText').textContent = '大厅服务器离线';
+            }
+        }
+        
+        // ===== 加载用户信息 =====
+        async function loadUserInfo() {
+            uid = getUrlParam('uid') || localStorage.getItem('uid') || getCookie('uid');
+            username = getUrlParam('username') || localStorage.getItem('user') || getCookie('username');
+            
+            if (!uid || !username) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 显示基本信息
+            document.getElementById('displayUid').textContent = uid;
+            document.getElementById('displayUsername').textContent = username;
+            
+            // 加载头像
+            const avatarContainer = document.getElementById('currentAvatar');
+            const avatarUrl = `${LOBBY_URL}/api/avatar/${uid}?t=${Date.now()}`;
+            
+            const img = new Image();
+            img.onload = function() {
+                avatarContainer.style.backgroundImage = `url(${avatarUrl})`;
+                avatarContainer.style.backgroundSize = 'cover';
+                avatarContainer.style.backgroundPosition = 'center';
+                avatarContainer.textContent = '';
+            };
+            img.onerror = function() {
+                avatarContainer.textContent = username.charAt(0).toUpperCase();
+            };
+            img.src = avatarUrl;
+            
+            // 加载背景图片
+            const backgroundUrl = `${LOBBY_URL}/api/background/${uid}?t=${Date.now()}`;
+            fetch(backgroundUrl)
+                .then(res => {
+                    if (res.ok) {
+                        return res.blob();
+                    }
+                    throw new Error('背景加载失败');
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    document.getElementById('currentBackground').style.backgroundImage = `url(${url})`;
+                })
+                .catch(() => {});
+            
+            // 加载签名
+            const savedSig = localStorage.getItem(`sig_${uid}`);
+            if (savedSig) {
+                document.getElementById('signature').value = savedSig;
+                originalSignature = savedSig;
+            }
+            
+            // 检查服务器状态
+            checkServerStatus();
+        }
+        
+        function getUrlParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // ===== 保存设置 =====
+        async function saveSettings() {
+            const signature = document.getElementById('signature').value.trim();
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            if (!token) {
+                showError('未登录，请重新登录');
+                setTimeout(() => window.location.href = 'login.html', 2000);
+                return;
+            }
+            
+            // 显示加载遮罩
+            document.getElementById('loadingOverlay').classList.add('show');
+            document.getElementById('saveBtn').disabled = true;
+            
+            let success = true;
+            let errorMessages = [];
+            let changes = [];
+            
+            // 1. 保存签名到本地（签名存在 localStorage）
+            if (signature !== originalSignature) {
+                localStorage.setItem(`sig_${uid}`, signature);
+                changes.push('签名');
+                originalSignature = signature;
+            }
+            
+            // 2. 上传头像（如果需要）
+            if (selectedAvatar) {
+                const formData = new FormData();
+                formData.append('avatar', selectedAvatar);
+                formData.append('uid', uid);
+                formData.append('username', username);
+                formData.append('session_token', token);
+                
+                document.getElementById('avatarProgress').style.display = 'block';
+                document.getElementById('avatarProgressFill').style.width = '30%';
+                
+                try {
+                    const res = await fetch(`${LOBBY_URL}/api/upload_avatar`, {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include',
+                        mode: 'cors'
+                    });
+                    
+                    document.getElementById('avatarProgressFill').style.width = '80%';
+                    
+                    if (res.ok) {
+                        changes.push('头像');
+                        document.getElementById('avatarProgressFill').style.width = '100%';
+                        setTimeout(() => {
+                            const avatarUrl = `${LOBBY_URL}/api/avatar/${uid}?t=${Date.now()}`;
+                            document.getElementById('currentAvatar').style.backgroundImage = `url(${avatarUrl})`;
+                            document.getElementById('avatarProgress').style.display = 'none';
+                            document.getElementById('avatarProgressFill').style.width = '0%';
+                        }, 500);
+                        selectedAvatar = null;
+                    } else {
+                        const errorData = await res.json();
+                        success = false;
+                        errorMessages.push('头像上传失败: ' + (errorData.error || '未知错误'));
+                        document.getElementById('avatarProgress').style.display = 'none';
+                    }
+                } catch (e) {
+                    success = false;
+                    errorMessages.push('头像上传失败: ' + e.message);
+                    document.getElementById('avatarProgress').style.display = 'none';
+                }
+            }
+            
+            // 3. 上传背景（如果需要）
+            if (selectedBackground) {
+                const formData = new FormData();
+                formData.append('background', selectedBackground);
+                formData.append('uid', uid);
+                formData.append('session_token', token);
+                
+                document.getElementById('backgroundProgress').style.display = 'block';
+                document.getElementById('backgroundProgressFill').style.width = '30%';
+                
+                try {
+                    const res = await fetch(`${LOBBY_URL}/api/upload_background`, {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include',
+                        mode: 'cors'
+                    });
+                    
+                    document.getElementById('backgroundProgressFill').style.width = '80%';
+                    
+                    if (res.ok) {
+                        changes.push('背景');
+                        document.getElementById('backgroundProgressFill').style.width = '100%';
+                        setTimeout(() => {
+                            const backgroundUrl = `${LOBBY_URL}/api/background/${uid}?t=${Date.now()}`;
+                            fetch(backgroundUrl)
+                                .then(res => res.blob())
+                                .then(blob => {
+                                    const url = URL.createObjectURL(blob);
+                                    document.getElementById('currentBackground').style.backgroundImage = `url(${url})`;
+                                });
+                            document.getElementById('backgroundProgress').style.display = 'none';
+                            document.getElementById('backgroundProgressFill').style.width = '0%';
+                        }, 500);
+                        selectedBackground = null;
+                    } else {
+                        const errorData = await res.json();
+                        success = false;
+                        errorMessages.push('背景上传失败: ' + (errorData.error || '未知错误'));
+                        document.getElementById('backgroundProgress').style.display = 'none';
+                    }
+                } catch (e) {
+                    success = false;
+                    errorMessages.push('背景上传失败: ' + e.message);
+                    document.getElementById('backgroundProgress').style.display = 'none';
+                }
+            }
+            
+            // 隐藏加载遮罩
+            document.getElementById('loadingOverlay').classList.remove('show');
+            document.getElementById('saveBtn').disabled = false;
+            
+            if (success) {
+                if (changes.length > 0) {
+                    showSuccess(`修改成功: ${changes.join('、')}`);
+                    
+                    // 延迟后跳转或刷新
+                    setTimeout(() => {
+                        // 检查是否有修改用户名（通过检测签名是否被修改？实际上我们无法直接知道）
+                        // 为了确保跳转时使用最新的用户名，我们总是跳转到个人主页并传递当前用户名
+                        const platform = detectPlatform();
+                        if (platform === 'mobile') {
+                            window.location.href = `profile.html?uid=${uid}&username=${encodeURIComponent(username)}`;
+                        } else {
+                            window.location.href = `pc-profile.html?uid=${uid}&username=${encodeURIComponent(username)}`;
+                        }
+                    }, 1500);
+                } else {
+                    showSuccess('没有需要保存的修改');
+                    setTimeout(() => {
+                        goBack();
+                    }, 1500);
+                }
+            } else {
+                showError(errorMessages.join('；'));
+            }
+        }
+        
+        // ===== 消息提示 =====
+        function showSuccess(msg) {
+            const el = document.getElementById('successMessage');
+            el.textContent = '✅ ' + msg;
+            el.style.display = 'block';
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 3000);
+        }
+        
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = '❌ ' + msg;
+            el.style.display = 'block';
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 3000);
+        }
+        
+        // ===== 初始化 =====
+        document.addEventListener('DOMContentLoaded', loadUserInfo);
+    </script>
+    <!-- 统一心跳管理 -->
+    <script src="heartbeat.js"></script>
+</body>
+</html>

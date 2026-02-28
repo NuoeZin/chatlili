@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>聊天室</title>
+    <style>
+        /* ===== 通用样式 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #36393e;
+            color: #dcddde;
+            line-height: 1.5;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        .mobile-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #36393e;
+            max-width: 100%;
+            position: relative;
+        }
+
+        /* 顶栏 */
+        .mobile-header {
+            height: 60px;
+            background: #2f3136;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            border-bottom: 1px solid #202225;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        /* 返回按钮样式 */
+        .back-btn {
+            background: #40444b;
+            border: none;
+            color: #b9bbbe;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+            padding: 0;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .back-btn:hover {
+            background: #5865f2;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        .channel-info h2 {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 200px;
+        }
+
+        .mobile-user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .mobile-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        /* 菜单按钮 */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 6px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .menu-btn:hover {
+            background: #40444b;
+            color: #fff;
+        }
+
+        /* 聊天区域 */
+        .mobile-chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 80px;
+        }
+
+        .messages-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 加载指示器 */
+        .loading-indicator {
+            text-align: center;
+            padding: 20px;
+            color: #72767d;
+            font-size: 14px;
+            display: none;
+        }
+
+        .loading-indicator.show {
+            display: block;
+        }
+
+        /* 消息样式 */
+        .message {
+            display: flex;
+            margin-bottom: 16px;
+            align-items: flex-start;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.self {
+            justify-content: flex-end;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .avatar.text-avatar {
+            background-color: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .bubble {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            margin: 0 8px;
+            line-height: 1.5;
+            position: relative;
+            word-wrap: break-word;
+            font-size: 15px;
+        }
+
+        .other .bubble {
+            background: #40444b;
+            color: #dcddde;
+            border-top-left-radius: 4px;
+        }
+
+        .self .bubble {
+            background: #5865f2;
+            color: white;
+            border-top-right-radius: 4px;
+        }
+
+        .other .bubble::before {
+            content: "";
+            position: absolute;
+            left: -8px;
+            top: 12px;
+            border: 8px solid transparent;
+            border-right-color: #40444b;
+        }
+
+        .self .bubble::before {
+            content: "";
+            position: absolute;
+            right: -8px;
+            top: 12px;
+            border: 8px solid transparent;
+            border-left-color: #5865f2;
+        }
+
+        .message-name {
+            font-weight: bold;
+            margin-bottom: 2px;
+            color: #00b0f4;
+            font-size: 14px;
+        }
+
+        .message-time {
+            color: #72767d;
+            font-size: 11px;
+            margin-left: 8px;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* 图片样式 */
+        .bubble img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        /* 文件气泡样式 */
+        .file-bubble {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            max-width: 100%;
+        }
+
+        .file-bubble:hover {
+            border-color: #5865f2;
+            background: #36393f;
+        }
+
+        .file-bubble-icon {
+            font-size: 22px;
+            margin-right: 10px;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        .file-bubble-name {
+            color: #00b0f4;
+            word-break: break-all;
+            font-size: 13px;
+            flex: 1;
+        }
+
+        .self .file-bubble {
+            background: #4752c4;
+            border-color: #5b6ae8;
+        }
+
+        .self .file-bubble-name {
+            color: white;
+        }
+
+        /* 输入区域 */
+        .mobile-input-area {
+            background: #40444b;
+            border-top: 1px solid #202225;
+            padding: 8px 12px;
+            flex-shrink: 0;
+            position: sticky;
+            bottom: 0;
+            width: 100%;
+            z-index: 99;
+        }
+
+        .mobile-message-input {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .mobile-input-wrapper {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            background: #2f3136;
+            border: 1px solid #202225;
+            border-radius: 24px;
+            padding: 0 4px 0 12px;
+        }
+
+        #mobileInput {
+            flex: 1;
+            min-width: 0;
+            padding: 8px 4px 8px 0;
+            background: transparent;
+            border: none;
+            border-radius: 24px;
+            color: #dcddde;
+            font-size: 15px;
+            outline: none;
+            height: 40px;
+        }
+
+        .emoji-quick-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 6px;
+            color: #b9bbbe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            width: 40px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .emoji-quick-btn:hover {
+            background: #40444b;
+            color: #fff;
+        }
+
+        .mobile-btn {
+            padding: 0 14px;
+            border: none;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            white-space: nowrap;
+            min-width: 60px;
+            transition: background 0.2s;
+        }
+
+        .btn-send {
+            background: #5865f2;
+            color: white;
+        }
+
+        .btn-send:hover {
+            background: #4752c4;
+        }
+
+        /* 表情选择器 */
+        .emoji-picker-overlay {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #2f3136;
+            border-top: 1px solid #40444b;
+            border-radius: 20px 20px 0 0;
+            padding: 12px;
+            z-index: 1000;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+            animation: slideUp 0.3s ease;
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .emoji-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #40444b;
+        }
+
+        .emoji-picker-title {
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .emoji-picker-close {
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .emoji-picker-close:hover {
+            background: #40444b;
+            color: #fff;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+            gap: 8px;
+            padding: 4px 0;
+        }
+
+        .emoji-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            background: #40444b;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            aspect-ratio: 1;
+        }
+
+        .emoji-item:hover {
+            background: #5865f2;
+        }
+
+        .emoji-item img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        /* 菜单下拉 - 调小高度 */
+        .menu-dropdown {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 75%;
+            max-width: 280px;
+            height: 100vh;
+            background: #2f3136;
+            border-left: 1px solid #40444b;
+            padding: 16px 0;
+            z-index: 10000;
+            flex-direction: column;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.3);
+            transition: right 0.3s ease;
+            display: flex;
+        }
+
+        .menu-dropdown.show {
+            right: 0;
+        }
+
+        .menu-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 22px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .menu-user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .menu-username {
+            color: #fff;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .menu-uid {
+            color: #00b0f4;
+            font-size: 12px;
+            font-family: monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .menu-server {
+            color: #b9bbbe;
+            font-size: 12px;
+            margin-top: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .menu-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 0;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            color: #dcddde;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            transition: background 0.2s;
+            border-bottom: 1px solid rgba(64,68,75,0.3);
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:hover {
+            background: #40444b;
+        }
+
+        .menu-item span {
+            font-size: 20px;
+            width: 28px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .menu-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            color: #b9bbbe;
+            font-size: 28px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.3);
+            transition: background 0.2s;
+            z-index: 10001;
+        }
+
+        .menu-close:hover {
+            background: #40444b;
+            color: #fff;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            z-index: 9999;
+        }
+
+        .menu-overlay.show {
+            display: block;
+        }
+
+        /* 模态框样式 - 只保留需要的 */
+        .username-modal, .avatar-modal {
+            display: none;
+            position: fixed;
+            z-index: 10002;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(5px);
+        }
+
+        .username-modal-content, .avatar-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2f3136;
+            padding: 24px;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 340px;
+        }
+
+        .username-modal-content h3, .avatar-modal-content h3 {
+            color: #fff;
+            margin-bottom: 16px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .username-modal-content input, #mobileAvatarInput {
+            width: 100%;
+            padding: 14px;
+            background: #40444b;
+            border: 1px solid #202225;
+            border-radius: 14px;
+            color: white;
+            font-size: 15px;
+            margin-bottom: 14px;
+            outline: none;
+        }
+
+        .username-modal-content input:focus, #mobileAvatarInput:focus {
+            border-color: #5865f2;
+        }
+
+        .username-modal-buttons, .avatar-modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .username-modal-btn, .avatar-modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        /* 图片预览模态框 */
+        .mobile-modal {
+            display: none;
+            position: fixed;
+            z-index: 10004;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.98);
+            backdrop-filter: blur(10px);
+        }
+
+        .mobile-modal img {
+            max-width: 95%;
+            max-height: 85%;
+            margin: auto;
+            display: block;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 12px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            color: white;
+            font-size: 36px;
+            cursor: pointer;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            z-index: 10005;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #5865f2;
+        }
+
+        /* 连接状态 */
+        .connection-status {
+            text-align: center;
+            padding: 6px;
+            margin-bottom: 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status-connected {
+            background: rgba(59, 165, 93, 0.15);
+            color: #3ba55d;
+            border: 1px solid rgba(59, 165, 93, 0.3);
+        }
+
+        .status-disconnected {
+            background: rgba(240, 71, 71, 0.15);
+            color: #f04747;
+            border: 1px solid rgba(240, 71, 71, 0.3);
+        }
+
+        /* 文件上传隐藏 */
+        #mobileFileInput {
+            display: none;
+        }
+
+        /* 安全区适配 */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .mobile-input-area {
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+            }
+            .mobile-chat {
+                padding-bottom: max(70px, calc(env(safe-area-inset-bottom) + 50px));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- 顶栏 -->
+        <div class="mobile-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <!-- 添加圆形返回按钮 -->
+                <button class="back-btn" onclick="window.location.href='index.html'" title="返回房间列表">
+                    ←
+                </button>
+                <div class="channel-info">
+                    <h2 id="mobileServerName">加载中...</h2>
+                </div>
+            </div>
+            <div class="mobile-user-info">
+                <div id="mobileAvatarContainer" class="mobile-avatar"></div>
+                <button class="menu-btn" onclick="toggleMenu()">☰</button>
+            </div>
+        </div>
+
+        <!-- 菜单遮罩层 -->
+        <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+        
+        <!-- 菜单下拉 -->
+        <div id="menuDropdown" class="menu-dropdown">
+            <div class="menu-close" onclick="toggleMenu()">✕</div>
+            <div class="menu-header">
+                <div id="menuAvatar" class="menu-avatar">?</div>
+                <div class="menu-user-info">
+                    <div id="menuUsername" class="menu-username">未登录</div>
+                    <div id="menuUid" class="menu-uid">UID: 加载中...</div>
+                    <div id="menuServerName" class="menu-server">服务器名</div>
+                </div>
+            </div>
+            <div class="menu-items">
+                <div class="menu-item" onclick="selectFile()">发送文件</div>
+                <div class="menu-item" onclick="window.location.href='friends.html'">好友</div>
+                <div class="menu-item" onclick="window.location.href='about.html'">其他</div>
+            </div>
+        </div>
+
+        <!-- 聊天区域 -->
+        <div id="mobileChat" class="mobile-chat">
+            <div id="loadingIndicator" class="loading-indicator">加载更多历史消息...</div>
+            <div id="messagesContainer" class="messages-container"></div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="mobile-input-area">
+            <div id="mobileConnectionStatus" class="connection-status status-connected"></div>
+            <div class="mobile-message-input">
+                <div class="mobile-input-wrapper">
+                    <input id="mobileInput" type="text" placeholder="输入消息..." autocomplete="off">
+                    <button class="emoji-quick-btn" onclick="toggleEmojiPicker()">😊</button>
+                </div>
+                <button class="mobile-btn btn-send" onclick="sendMobileText()">发送</button>
+            </div>
+        </div>
+
+        <!-- 表情选择器 -->
+        <div id="emojiPicker" class="emoji-picker-overlay">
+            <div class="emoji-picker-header">
+                <span class="emoji-picker-title">选择表情</span>
+                <button class="emoji-picker-close" onclick="toggleEmojiPicker()">✕</button>
+            </div>
+            <div id="emojiGrid" class="emoji-grid">
+                <div style="color:#72767d; text-align:center; grid-column:1/-1; padding:16px;">加载表情中...</div>
+            </div>
+        </div>
+
+        <!-- 文件上传 -->
+        <input type="file" id="mobileFileInput" onchange="sendMobileFile()">
+
+        <!-- 图片预览 -->
+        <div id="mobileImgModal" class="mobile-modal">
+            <span class="modal-close" onclick="this.parentElement.style.display='none'">&times;</span>
+            <img id="mobileModalImg">
+        </div>
+    </div>
+
+    <script>
+        // ===== 全局变量 =====
+        let mobileSocket;
+        let mobileUser = localStorage.getItem("user");
+        let mobileUid = localStorage.getItem("uid");
+        let mobileIp = localStorage.getItem("ip");
+        let mobilePort = localStorage.getItem("port");
+        let mobileHttpPort = localStorage.getItem("serverHttpPort") || 5000;
+        let mobileServerName = localStorage.getItem("serverName") || "移动聊天";
+        let mobileOldestId = null;
+        let mobileReconnectAttempts = 0;
+        let isLoadingHistory = false;
+        let hasMoreHistory = true;
+        const MOBILE_MAX_RECONNECT = 5;
+
+        // 在线用户列表
+        let onlineUsers = [];
+        let mentionListVisible = false;
+        let mentionFilter = '';
+
+        // ===== 图片懒加载 =====
+        let imageObserver;
+
+        function initLazyLoading() {
+            if ('IntersectionObserver' in window) {
+                imageObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            if (img.dataset.src) {
+                                img.src = img.dataset.src;
+                                img.removeAttribute('data-src');
+                                imageObserver.unobserve(img);
+                            }
+                        }
+                    });
+                }, { rootMargin: '50px 0px', threshold: 0.01 });
+            }
+        }
+
+        // ===== 工具函数 =====
+        function escapeHtml(text) {
+            if (!text) return "";
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function formatMessageTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            if (date >= today) return timeStr;
+            if (date >= yesterday) return `昨天 ${timeStr}`;
+            return `${date.getMonth()+1}/${date.getDate()} ${timeStr}`;
+        }
+
+        // ===== 头像加载 =====
+        function loadAvatar(containerId, username) {
+            const container = document.getElementById(containerId);
+            if (!container || !username) return;
+            
+            container.innerHTML = '';
+            container.style.backgroundImage = '';
+            container.classList.remove('text-avatar');
+            
+            const avatarUrl = `http://${mobileIp}:${mobileHttpPort}/avatar/${encodeURIComponent(username)}?t=${Date.now()}`;
+            
+            const img = new Image();
+            img.onload = function() {
+                container.style.backgroundImage = `url(${avatarUrl})`;
+                container.style.backgroundSize = 'cover';
+                container.style.backgroundPosition = 'center';
+            };
+            img.onerror = function() {
+                container.classList.add('text-avatar');
+                container.textContent = username.charAt(0).toUpperCase();
+            };
+            img.src = avatarUrl;
+        }
+
+        function loadMessageAvatar(container, username) {
+            if (!container || !username) return;
+            
+            container.innerHTML = '';
+            container.style.backgroundImage = '';
+            container.classList.remove('text-avatar');
+            
+            const avatarUrl = `http://${mobileIp}:${mobileHttpPort}/avatar/${encodeURIComponent(username)}?t=${Date.now()}`;
+            
+            const img = new Image();
+            img.onload = function() {
+                container.style.backgroundImage = `url(${avatarUrl})`;
+                container.style.backgroundSize = 'cover';
+                container.style.backgroundPosition = 'center';
+            };
+            img.onerror = function() {
+                container.classList.add('text-avatar');
+                container.textContent = username.charAt(0).toUpperCase();
+            };
+            img.src = avatarUrl;
+        }
+
+        function loadAllAvatars() {
+            loadAvatar('mobileAvatarContainer', mobileUser);
+            loadAvatar('menuAvatar', mobileUser);
+        }
+
+        // ===== 获取在线用户（异步从服务器获取）=====
+        async function updateOnlineUsers() {
+            try {
+                const res = await fetch(`http://${mobileIp}:${mobileHttpPort}/api/online-users`);
+                if (res.ok) {
+                    const data = await res.json();
+                    onlineUsers = data.users.map(username => ({
+                        username: username,
+                        uid: '在线'
+                    }));
+                    console.log("在线用户:", onlineUsers);
+                    return onlineUsers;
+                } else {
+                    console.error("获取在线用户失败");
+                    onlineUsers = [];
+                    return [];
+                }
+            } catch (e) {
+                console.error("获取在线用户失败:", e);
+                onlineUsers = [];
+                return [];
+            }
+        }
+
+        // ===== @用户列表（异步版本）=====
+        async function showMentionList() {
+            // 检查是否存在mentionList元素
+            let mentionList = document.getElementById('mentionList');
+            if (!mentionList) {
+                // 如果不存在，创建一个
+                mentionList = document.createElement('div');
+                mentionList.id = 'mentionList';
+                mentionList.className = 'mention-list';
+                document.body.appendChild(mentionList);
+                
+                // 添加样式
+                const style = document.createElement('style');
+                style.textContent = `
+                    .mention-list {
+                        position: fixed;
+                        bottom: 70px;
+                        left: 10px;
+                        right: 10px;
+                        max-height: 200px;
+                        background: #2f3136;
+                        border: 1px solid #40444b;
+                        border-radius: 8px;
+                        overflow-y: auto;
+                        z-index: 1000;
+                        display: none;
+                    }
+                    .mention-list.show {
+                        display: block;
+                    }
+                    .mention-item {
+                        padding: 10px;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        cursor: pointer;
+                        border-bottom: 1px solid #40444b;
+                    }
+                    .mention-item:hover {
+                        background: #40444b;
+                    }
+                    .mention-avatar {
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
+                        background-color: #5865f2;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 14px;
+                        background-size: cover;
+                        background-position: center;
+                    }
+                    .mention-name {
+                        color: #fff;
+                        font-size: 14px;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // 显示加载中状态
+            mentionList.innerHTML = '<div class="mention-item" style="justify-content:center; color:#72767d;">加载在线用户...</div>';
+            mentionList.classList.add('show');
+            
+            // 异步获取在线用户
+            await updateOnlineUsers();
+            
+            const filtered = onlineUsers.filter(u => 
+                u.username !== mobileUser && 
+                u.username.toLowerCase().includes(mentionFilter.toLowerCase())
+            );
+            
+            if (filtered.length === 0) {
+                mentionList.innerHTML = '<div class="mention-item" style="justify-content:center; color:#72767d;">暂无匹配的在线用户</div>';
+                setTimeout(() => mentionList.classList.remove('show'), 1500);
+                return;
+            }
+            
+            mentionList.innerHTML = filtered.map(user => `
+                <div class="mention-item" onclick="insertMention('${user.username}')">
+                    <div class="mention-avatar" style="background-image: url('http://${mobileIp}:${mobileHttpPort}/avatar/${encodeURIComponent(user.username)}?t=${Date.now()}')">${user.username.charAt(0).toUpperCase()}</div>
+                    <div class="mention-name">@${user.username}</div>
+                </div>
+            `).join('');
+            
+            mentionList.classList.add('show');
+            mentionListVisible = true;
+        }
+
+        function hideMentionList() {
+            const mentionList = document.getElementById('mentionList');
+            if (mentionList) {
+                mentionList.classList.remove('show');
+            }
+            mentionListVisible = false;
+            mentionFilter = '';
+        }
+
+        function insertMention(username) {
+            const input = document.getElementById('mobileInput');
+            const cursorPos = input.selectionStart;
+            const text = input.value;
+            
+            const lastAtPos = text.lastIndexOf('@', cursorPos - 1);
+            if (lastAtPos !== -1) {
+                const beforeAt = text.substring(0, lastAtPos);
+                const afterAt = text.substring(cursorPos);
+                input.value = beforeAt + '@' + username + ' ' + afterAt;
+            } else {
+                input.value = text + '@' + username + ' ';
+            }
+            
+            input.focus();
+            hideMentionList();
+        }
+
+        // ===== 创建消息元素 =====
+        function createMessageElement(msg) {
+            const isSelf = msg.user === mobileUser;
+            const timeStr = msg.time ? formatMessageTime(msg.time) : '';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSelf ? 'self' : 'other'}`;
+            if (msg.id) messageDiv.setAttribute('data-message-id', msg.id);
+            
+            if (!isSelf) {
+                const avatarDiv = document.createElement('div');
+                avatarDiv.className = 'avatar';
+                messageDiv.appendChild(avatarDiv);
+                loadMessageAvatar(avatarDiv, msg.user);
+            }
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            
+            if (!isSelf) {
+                const nameSpan = document.createElement('div');
+                nameSpan.className = 'message-name';
+                nameSpan.textContent = msg.user;
+                bubble.appendChild(nameSpan);
+            }
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            if (msg.type === 'image') {
+                const img = document.createElement('img');
+                img.dataset.src = `http://${mobileIp}:${mobileHttpPort}/file/${encodeURIComponent(msg.content)}`;
+                img.alt = msg.content;
+                img.classList.add('lazy-image');
+                
+                if (imageObserver) {
+                    img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
+                    imageObserver.observe(img);
+                } else {
+                    img.src = img.dataset.src;
+                }
+                
+                img.onclick = () => showImageModal(img.dataset.src || img.src);
+                contentDiv.appendChild(img);
+                
+            } else if (msg.type === 'emoji') {
+                const img = document.createElement('img');
+                img.src = `http://${mobileIp}:${mobileHttpPort}/emoji/${encodeURIComponent(msg.content)}`;
+                img.alt = msg.content;
+                img.style.width = '50px';
+                img.style.height = '50px';
+                img.style.objectFit = 'contain';
+                img.onerror = function() {
+                    this.style.display = 'none';
+                    const fallback = document.createElement('span');
+                    fallback.textContent = `[${msg.content.replace(/\.(png|gif|jpg)$/i, '')}]`;
+                    fallback.style.color = '#00b0f4';
+                    this.parentNode.appendChild(fallback);
+                };
+                contentDiv.appendChild(img);
+                
+            } else if (msg.type === 'video' || msg.type === 'audio' || msg.type === 'file') {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'file-bubble';
+                fileDiv.onclick = () => {
+                    window.location.href = `preview.html?ip=${mobileIp}&port=${mobileHttpPort}&file=${encodeURIComponent(msg.content)}&type=${msg.type}`;
+                };
+                
+                let icon = '📎';
+                const ext = msg.content.split('.').pop()?.toLowerCase() || '';
+                
+                if (['mp4', 'avi', 'mov', 'mkv', 'webm'].includes(ext)) icon = '🎬';
+                else if (['mp3', 'wav', 'flac', 'm4a', 'ogg'].includes(ext)) icon = '🎵';
+                else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) icon = '🖼️';
+                else if (ext === 'pdf') icon = '📄';
+                else if (['zip', 'rar', '7z'].includes(ext)) icon = '📦';
+                else if (['txt', 'md', 'log'].includes(ext)) icon = '📝';
+                
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'file-bubble-icon';
+                iconSpan.innerHTML = icon;
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'file-bubble-name';
+                nameSpan.textContent = msg.content;
+                
+                fileDiv.appendChild(iconSpan);
+                fileDiv.appendChild(nameSpan);
+                contentDiv.appendChild(fileDiv);
+                
+            } else {
+                let content = msg.content;
+                if (content && content.includes('@')) {
+                    const parts = content.split(/(@\w+)/g);
+                    parts.forEach(part => {
+                        if (part.startsWith('@')) {
+                            const mentionSpan = document.createElement('span');
+                            mentionSpan.style.color = '#00b0f4';
+                            mentionSpan.style.fontWeight = 'bold';
+                            mentionSpan.textContent = part;
+                            contentDiv.appendChild(mentionSpan);
+                        } else {
+                            contentDiv.appendChild(document.createTextNode(part));
+                        }
+                    });
+                } else {
+                    contentDiv.textContent = content;
+                }
+            }
+            
+            bubble.appendChild(contentDiv);
+            
+            if (msg.time) {
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'message-time';
+                timeSpan.textContent = timeStr;
+                bubble.appendChild(timeSpan);
+            }
+            
+            messageDiv.appendChild(bubble);
+            
+            if (isSelf) {
+                const avatarDiv = document.createElement('div');
+                avatarDiv.className = 'avatar';
+                messageDiv.appendChild(avatarDiv);
+                loadMessageAvatar(avatarDiv, msg.user);
+            }
+            
+            return messageDiv;
+        }
+
+        // ===== 添加消息 =====
+        function addMobileMessage(msg) {
+            const container = document.getElementById('messagesContainer');
+            if (!container) return;
+            
+            if (msg.id && document.querySelector(`[data-message-id="${msg.id}"]`)) return;
+            
+            if (msg.type === 'recall_notice') {
+                handleMobileRecallNotice(msg);
+                return;
+            }
+            
+            const messageDiv = createMessageElement(msg);
+            container.appendChild(messageDiv);
+            
+            const chat = document.getElementById('mobileChat');
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // ===== 处理撤回 =====
+        function handleMobileRecallNotice(msg) {
+            const messageId = msg.message_id;
+            const recalledBy = msg.recalled_by;
+            
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageElement) {
+                const bubble = messageElement.querySelector('.bubble');
+                if (bubble) {
+                    bubble.innerHTML = `<div style="color:#72767d; font-style:italic; padding:4px 0;">该消息已被 ${recalledBy || '用户'} 撤回</div>`;
+                }
+            }
+            
+            const statusDiv = document.getElementById('mobileConnectionStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'connection-status status-connected';
+            statusDiv.innerHTML = `🔔 ${recalledBy || '用户'} 撤回了一条消息`;
+            setTimeout(() => statusDiv.style.display = 'none', 3000);
+        }
+
+        // ===== @提醒处理 =====
+        function handleMobileMention(msg) {
+            console.log("处理@提醒:", msg);
+            
+            // 显示提醒
+            const statusDiv = document.getElementById('mobileConnectionStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'connection-status status-connected';
+            statusDiv.innerHTML = `🔔 ${msg.content}`;
+            setTimeout(() => statusDiv.style.display = 'none', 3000);
+            
+            // 播放提示音
+            if (msg.sound) {
+                console.log("播放提示音:", msg.sound.name);
+                playMentionSound(msg.sound);
+            } else {
+                console.log("没有提示音数据");
+            }
+        }
+
+        // ===== 播放提示音 =====
+        function playMentionSound(sound) {
+            if (!sound || !sound.data) {
+                console.log("无效的提示音数据");
+                return;
+            }
+            
+            try {
+                const audio = new Audio(`data:${sound.mime};base64,${sound.data}`);
+                audio.volume = 0.5;
+                audio.play()
+                    .then(() => console.log("提示音播放成功"))
+                    .catch(e => console.log("播放提示音失败:", e));
+            } catch (e) {
+                console.log("无法播放提示音:", e);
+            }
+        }
+
+        // ===== 处理跳转消息 =====
+        function handleRedirectMessage(msg) {
+            console.log("处理跳转彩蛋:", msg);
+            
+            // 显示提示消息
+            const statusDiv = document.getElementById('mobileConnectionStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'connection-status status-connected';
+            statusDiv.innerHTML = `🔗 ${msg.message || '即将跳转到...'}`;
+            setTimeout(() => statusDiv.style.display = 'none', 2000);
+            
+            // 同时在聊天框显示一条提示消息
+            const redirectNotice = {
+                type: "text",
+                user: msg.user,
+                content: `🔗 即将跳转到: ${msg.content}`,
+                time: Date.now(),
+                avatar: msg.avatar
+            };
+            addMobileMessage(redirectNotice);
+            
+            // 3秒后执行跳转
+            setTimeout(() => {
+                window.location.href = msg.content;
+            }, 3000);
+        }
+
+        // ===== WebSocket连接 =====
+        function connectMobileWebSocket() {
+            try {
+                mobileSocket = new WebSocket(`ws://${mobileIp}:${mobilePort}`);
+                
+                mobileSocket.onopen = function() {
+                    console.log("WebSocket已连接");
+                    mobileReconnectAttempts = 0;
+                    
+                    // 发送认证信息
+                    if (mobileUid && mobileUser) {
+                        mobileSocket.send(JSON.stringify({
+                            uid: mobileUid,
+                            user: mobileUser
+                        }));
+                    }
+                    
+                    const statusDiv = document.getElementById('mobileConnectionStatus');
+                    statusDiv.style.display = 'block';
+                    statusDiv.className = 'connection-status status-connected';
+                    statusDiv.innerHTML = '已连接到服务器';
+                    setTimeout(() => statusDiv.style.display = 'none', 3000);
+                };
+                
+                mobileSocket.onmessage = function(e) {
+                    try {
+                        const msg = JSON.parse(e.data);
+                        console.log("收到消息类型:", msg.type, msg);
+                        
+                        if (msg.type === "system") {
+                            const statusDiv = document.getElementById('mobileConnectionStatus');
+                            statusDiv.style.display = 'block';
+                            statusDiv.className = 'connection-status status-connected';
+                            statusDiv.innerHTML = `🔔 ${msg.content}`;
+                            setTimeout(() => statusDiv.style.display = 'none', 3000);
+                            
+                        } else if (msg.type === "mention") {
+                            console.log("收到@提醒:", msg);
+                            handleMobileMention(msg);
+                            
+                        } else if (msg.type === "recall_notice") {
+                            handleMobileRecallNotice(msg);
+                            
+                        } else if (msg.type === "redirect") {
+                            handleRedirectMessage(msg);
+                            
+                        } else {
+                            addMobileMessage(msg);
+                        }
+                    } catch (err) {
+                        console.error("解析失败:", err);
+                    }
+                };
+                
+                mobileSocket.onclose = function() {
+                    console.log("连接关闭");
+                    hideMentionList();
+                    if (mobileReconnectAttempts < MOBILE_MAX_RECONNECT) {
+                        mobileReconnectAttempts++;
+                        setTimeout(connectMobileWebSocket, 3000);
+                    }
+                };
+                
+            } catch (e) {
+                console.error("连接失败:", e);
+            }
+        }
+
+        // ===== 加载历史消息 =====
+        async function loadMobileHistory() {
+            try {
+                const res = await fetch(`http://${mobileIp}:${mobileHttpPort}/history`);
+                const list = await res.json();
+                
+                const container = document.getElementById('messagesContainer');
+                container.innerHTML = '';
+                
+                list.forEach(msg => addMobileMessage(msg));
+                
+                const chat = document.getElementById('mobileChat');
+                setTimeout(() => chat.scrollTop = chat.scrollHeight, 100);
+                
+                if (list.length) mobileOldestId = list[0].id;
+            } catch (e) {
+                console.error("加载历史消息失败:", e);
+            }
+        }
+
+        // ===== 加载更多历史消息 =====
+        async function loadMoreHistory() {
+            if (isLoadingHistory || !hasMoreHistory) return;
+            
+            isLoadingHistory = true;
+            const indicator = document.getElementById('loadingIndicator');
+            indicator.classList.add('show');
+            
+            const chat = document.getElementById('mobileChat');
+            const oldHeight = chat.scrollHeight;
+            
+            try {
+                const url = `http://${mobileIp}:${mobileHttpPort}/history?before=${mobileOldestId}`;
+                const res = await fetch(url);
+                const list = await res.json();
+                
+                if (list.length === 0) {
+                    hasMoreHistory = false;
+                    indicator.innerHTML = '已加载全部';
+                    setTimeout(() => indicator.classList.remove('show'), 2000);
+                    return;
+                }
+                
+                mobileOldestId = list[0].id;
+                
+                const container = document.getElementById('messagesContainer');
+                for (let i = list.length - 1; i >= 0; i--) {
+                    const msgDiv = createMessageElement(list[i]);
+                    container.insertBefore(msgDiv, container.firstChild);
+                }
+                
+                setTimeout(() => {
+                    chat.scrollTop = chat.scrollHeight - oldHeight;
+                }, 10);
+                
+            } catch (e) {
+                console.error("加载更多失败:", e);
+            } finally {
+                isLoadingHistory = false;
+                indicator.classList.remove('show');
+            }
+        }
+
+        // ===== 加载表情 =====
+        async function loadMobileEmojis() {
+            try {
+                const res = await fetch(`http://${mobileIp}:${mobileHttpPort}/emojis`);
+                const list = await res.json();
+                
+                const emojiGrid = document.getElementById('emojiGrid');
+                if (!emojiGrid) return;
+                
+                if (list.length === 0) {
+                    emojiGrid.innerHTML = '<div style="color:#72767d; text-align:center; padding:16px;">暂无表情</div>';
+                    return;
+                }
+                
+                emojiGrid.innerHTML = '';
+                list.forEach(name => {
+                    const item = document.createElement('div');
+                    item.className = 'emoji-item';
+                    
+                    const img = document.createElement('img');
+                    img.src = `http://${mobileIp}:${mobileHttpPort}/emoji/${encodeURIComponent(name)}`;
+                    img.alt = name;
+                    img.onerror = function() {
+                        this.style.display = 'none';
+                        this.parentNode.innerHTML = `<span style="color:#fff">${name.replace(/\.(png|gif)$/i, '')}</span>`;
+                    };
+                    
+                    item.onclick = () => {
+                        if (mobileSocket?.readyState === WebSocket.OPEN) {
+                            mobileSocket.send(JSON.stringify({
+                                type: "emoji",
+                                user: mobileUser,
+                                uid: mobileUid,
+                                content: name,
+                                time: Date.now()
+                            }));
+                        }
+                        toggleEmojiPicker();
+                    };
+                    
+                    item.appendChild(img);
+                    emojiGrid.appendChild(item);
+                });
+            } catch (e) {
+                console.error("加载表情失败:", e);
+            }
+        }
+
+        // ===== 发送消息 =====
+        function sendMobileText() {
+            const input = document.getElementById('mobileInput');
+            const content = input.value.trim();
+            if (!content) return;
+            
+            if (!mobileSocket || mobileSocket.readyState !== WebSocket.OPEN) {
+                alert('未连接到服务器');
+                return;
+            }
+            
+            mobileSocket.send(JSON.stringify({
+                type: "text",
+                user: mobileUser,
+                uid: mobileUid,
+                content: content,
+                time: Date.now()
+            }));
+            
+            input.value = '';
+            hideMentionList();
+        }
+
+        // ===== 发送文件 =====
+        async function sendMobileFile() {
+            const input = document.getElementById('mobileFileInput');
+            if (!input.files[0]) return;
+            
+            const file = input.files[0];
+            const form = new FormData();
+            form.append("file", file);
+            
+            try {
+                const res = await fetch(`http://${mobileIp}:${mobileHttpPort}/upload`, {
+                    method: "POST",
+                    body: form
+                });
+                
+                if (!res.ok) {
+                    const data = await res.json();
+                    alert(data.error || "上传失败");
+                    return;
+                }
+                
+                const data = await res.json();
+                
+                if (mobileSocket?.readyState === WebSocket.OPEN) {
+                    mobileSocket.send(JSON.stringify({
+                        type: data.type || "file",
+                        user: mobileUser,
+                        uid: mobileUid,
+                        content: data.filename,
+                        time: Date.now()
+                    }));
+                }
+                
+                input.value = '';
+                
+            } catch (e) {
+                alert("上传失败: " + e.message);
+            }
+        }
+
+        // ===== UI控制 =====
+        function toggleEmojiPicker() {
+            const picker = document.getElementById('emojiPicker');
+            picker.style.display = picker.style.display === 'block' ? 'none' : 'block';
+            hideMentionList();
+        }
+
+        function selectFile() {
+            document.getElementById('mobileFileInput').click();
+            toggleMenu();
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('menuDropdown');
+            const overlay = document.getElementById('menuOverlay');
+            menu.classList.toggle('show');
+            overlay.classList.toggle('show');
+            hideMentionList();
+        }
+
+        function showChangeUsernameModal() {
+            toggleMenu();
+            document.getElementById('usernameModal').style.display = 'block';
+        }
+
+        function showImageModal(src) {
+            const modal = document.getElementById('mobileImgModal');
+            const modalImg = document.getElementById('mobileModalImg');
+            modalImg.src = src;
+            modal.style.display = 'block';
+            hideMentionList();
+        }
+
+        // ===== 输入框监听 =====
+        function setupInputListeners() {
+            const input = document.getElementById('mobileInput');
+            
+            input.addEventListener('input', async function(e) {
+                const value = e.target.value;
+                const cursorPos = e.target.selectionStart;
+                
+                const lastAtPos = value.lastIndexOf('@', cursorPos - 1);
+                if (lastAtPos !== -1) {
+                    const afterAt = value.substring(lastAtPos + 1, cursorPos);
+                    mentionFilter = afterAt;
+                    await showMentionList();
+                } else {
+                    hideMentionList();
+                }
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    hideMentionList();
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                setTimeout(() => hideMentionList(), 200);
+            });
+        }
+
+        // ===== 初始化 =====
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('mobileServerName').textContent = mobileServerName;
+            document.getElementById('menuServerName').textContent = mobileServerName;
+            
+            if (!mobileUser || !mobileIp || !mobilePort) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            document.getElementById('menuUsername').textContent = mobileUser;
+            document.getElementById('menuUid').textContent = `UID: ${mobileUid || '未知'}`;
+            
+            initLazyLoading();
+            loadAllAvatars();
+            connectMobileWebSocket();
+            loadMobileHistory();
+            loadMobileEmojis();
+            setupInputListeners();
+            
+            const chat = document.getElementById('mobileChat');
+            chat.addEventListener('scroll', () => {
+                if (chat.scrollTop < 100 && !isLoadingHistory && hasMoreHistory) {
+                    loadMoreHistory();
+                }
+            });
+            
+            document.getElementById('mobileInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMobileText();
+                }
+            });
+        });
+
+        document.getElementById('mobileImgModal').onclick = function(e) {
+            if (e.target === this) this.style.display = 'none';
+        };
+
+        window.onkeydown = function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('mobileImgModal').style.display = 'none';
+                document.getElementById('avatarModal').style.display = 'none';
+                document.getElementById('usernameModal').style.display = 'none';
+                document.getElementById('emojiPicker').style.display = 'none';
+                document.getElementById('menuDropdown').classList.remove('show');
+                document.getElementById('menuOverlay').classList.remove('show');
+                hideMentionList();
+            }
+        };
+        
+        // ===== 读取用户设置 =====
+        function getUserSettings() {
+            try {
+                const savedSettings = localStorage.getItem('chatSettings');
+                if (savedSettings) {
+                    return JSON.parse(savedSettings);
+                }
+            } catch (e) {
+                console.error("读取设置失败:", e);
+            }
+            
+            // 默认设置
+            return {
+                mentionSound: true,
+                autoDownload: 5,
+                timeFormat: '24',
+                compactMode: false
+            };
+        }
+
+        // 根据时间格式显示时间
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const settings = getUserSettings();
+            if (settings.timeFormat === '12') {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+            } else {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            }
+        }
+
+        // 应用用户设置
+        const settings = getUserSettings();
+        console.log("当前设置:", settings);
+        
+        if (settings.compactMode) {
+            document.body.classList.add('compact-mode');
+        }
+    </script>
+    <!-- 统一心跳管理 -->
+    <script src="heartbeat.js"></script>
+</body>
+</html>

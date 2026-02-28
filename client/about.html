@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>其他</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 选项卡容器 */
+        .tab-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #2f3136;
+            border-radius: 16px;
+            border: 1px solid #40444b;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        
+        /* 选项卡头部 - 现在包含返回按钮 */
+        .tab-header {
+            display: flex;
+            background: #2f3136;
+            border-bottom: 1px solid #40444b;
+        }
+        
+        /* 返回按钮 - 作为第一个选项卡 */
+        .back-tab {
+            width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            border-right: 1px solid #40444b;
+            color: #b9bbbe;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .back-tab:hover {
+            background: #40444b;
+            color: #fff;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 16px 10px;
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .tab-btn:hover {
+            color: #fff;
+            background: #40444b;
+        }
+        
+        .tab-btn.active {
+            color: #fff;
+            background: #40444b;
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #5865f2;
+        }
+        
+        /* 选项卡内容 */
+        .tab-content {
+            padding: 30px;
+            background: #36393f;
+        }
+        
+        .tab-pane {
+            display: none;
+        }
+        
+        .tab-pane.active {
+            display: block;
+        }
+        
+        /* 揭示板样式 */
+        .announcement-item {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        .announcement-item:hover {
+            border-color: #5865f2;
+            transform: translateY(-2px);
+        }
+        
+        .announcement-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .announcement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .announcement-title-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .announcement-title {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .announcement-date {
+            color: #72767d;
+            font-size: 12px;
+            background: #40444b;
+            padding: 4px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        
+        .announcement-content {
+            color: #dcddde;
+            font-size: 14px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        
+        .announcement-tag {
+            display: inline-block;
+            background: #5865f2;
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 8px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        /* 关于样式 */
+        .about-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .about-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .about-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .about-title {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .about-version {
+            color: #72767d;
+            font-size: 14px;
+            background: #40444b;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .about-info {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .about-info-item {
+            display: flex;
+            margin-bottom: 15px;
+            color: #dcddde;
+            font-size: 14px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #40444b;
+        }
+        
+        .about-info-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .about-info-label {
+            width: 100px;
+            color: #b9bbbe;
+        }
+        
+        .about-info-value {
+            flex: 1;
+            color: #fff;
+            font-weight: 500;
+        }
+        
+        .about-description {
+            color: #d9dbdf;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            font-size: 14px;
+            padding: 16px;
+            background: #2f3136;
+            border-radius: 8px;
+            border-left: 3px solid #5865f2;
+        }
+        
+        .about-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .about-link {
+            color: #5865f2;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+            padding: 8px 16px;
+            background: #40444b;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .about-link:hover {
+            background: #5865f2;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* 鸣谢卡片样式 */
+        .credits-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .credit-category {
+            background: #2f3136;
+            border-radius: 12px;
+            border: 1px solid #40444b;
+            overflow: hidden;
+        }
+        
+        .category-title {
+            background: #40444b;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 12px 16px;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #4f545c;
+        }
+        
+        .category-items {
+            padding: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px 20px;
+        }
+        
+        .credit-person {
+            flex: 1 1 calc(50% - 20px);
+            min-width: 160px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #dcddde;
+            font-size: 14px;
+        }
+        
+        /* 基础头像容器样式 */
+        .credit-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #5865f2; /* 默认背景色 */
+        }
+        
+        /* 图片头像样式 */
+        .credit-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        /* 字母头像样式 */
+        .credit-avatar .avatar-letter {
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+        
+        /* 开源项目的彩色背景 - 保留原来的颜色 */
+        .credit-avatar.bg-pink { background: #ed8796; }
+        .credit-avatar.bg-green { background: #a6da95; }
+        .credit-avatar.bg-orange { background: #f5a97f; }
+        .credit-avatar.bg-blue { background: #7dc4e4; }
+        .credit-avatar.bg-purple { background: #c6a0f6; }
+        .credit-avatar.bg-rose { background: #f0c6c6; }
+        
+        /* 教程卡片样式 */
+        .tutorial-section {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .tutorial-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .tutorial-title {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #5865f2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tutorial-title span {
+            font-size: 24px;
+        }
+        
+        .tutorial-item {
+            background: #40444b;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+        
+        .tutorial-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .tutorial-item-title {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .tutorial-item-title code {
+            background: #2f3136;
+            color: #5865f2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .tutorial-item-desc {
+            color: #b9bbbe;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .tutorial-item-desc ul {
+            margin: 6px 0 0 0;
+            padding-left: 20px;
+        }
+        
+        .tutorial-item-desc li {
+            margin-bottom: 4px;
+        }
+        
+        .tutorial-tip {
+            background: #40444b;
+            border-left: 4px solid #5865f2;
+            padding: 12px 16px;
+            border-radius: 4px;
+            color: #dcddde;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+        
+        .tutorial-tip strong {
+            color: #5865f2;
+        }
+        
+        .command-badge {
+            display: inline-block;
+            background: #5865f2;
+            color: white;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+        
+        /* 空状态提示 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #72767d;
+            background: #2f3136;
+            border-radius: 8px;
+            border: 1px dashed #40444b;
+        }
+        
+        .empty-state span {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 15px;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .tab-container {
+                margin: 20px 15px;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+            
+            .back-tab {
+                width: 50px;
+                font-size: 20px;
+            }
+            
+            .tab-btn {
+                padding: 12px 5px;
+                font-size: 14px;
+            }
+            
+            .announcement-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .about-info-item {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .about-info-label {
+                width: 100%;
+            }
+
+            .credit-person {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tab-container">
+        <!-- 选项卡头部 - 返回按钮 + 揭示板 + 关于 + 教程 + 鸣谢 -->
+        <div class="tab-header">
+            <button class="back-tab" onclick="goBack()" title="返回">←</button>
+            <button class="tab-btn" onclick="switchTab(event, 'board')">揭示板</button>
+            <button class="tab-btn active" onclick="switchTab(event, 'about')">关于</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tutorial')">教程</button>
+            <button class="tab-btn" onclick="switchTab(event, 'credits')">鸣谢</button>
+        </div>
+        
+        <!-- 选项卡内容 -->
+        <div class="tab-content">
+            <!-- 揭示板选项卡 - 已更新v1.3.0介绍 -->
+            <div id="board" class="tab-pane">
+                <!-- v1.3.0 版本更新 - 新加在最前面 -->
+                <div class="announcement-item">
+                    <div class="announcement-header">
+                        <div class="announcement-title-group">
+                            <span class="announcement-tag">NEW</span>
+                            <span class="announcement-title">v1.3.0 版本 - 安全与管理大升级</span>
+                        </div>
+                        <span class="announcement-date">2026-02-18</span>
+                    </div>
+                    <div class="announcement-content">
+                        <strong>Chat服务器安全性增强</strong><br>
+                        • 新增黑名单功能，可管理不受欢迎的用户<br>
+                        • 聊天室管理员机制上线，可指定房间管理员<br>
+                        • 房间密码设置功能，私密聊天更安全<br>
+                        <br>
+                        <strong>大厅功能多元化</strong><br>
+                        • Lobby服务器功能扩展，成为真正的中心枢纽<br>
+                        • 统一数据大厅来源，chat跑起来便轻松加愉快<br>
+                        <br>
+                        <strong>好友系统全面上线</strong><br>
+                        • 好友添加、删除、状态查看完整功能<br>
+                        • 好友在线状态实时更新<br>
+                        • 个人资料页面全面个性化<br>
+                        <br>
+                        <strong>一起来玩Minecraft！</strong><br>
+                        • 盒子新加入了https://miaaoo.com的基岩版联机厅功能<br>
+                        • 点击广播，再点击广播，等待加载自动打开MC<br>
+                        • 什么你沒下MC？！去https://mcapks.net去下一个吧😋<br>
+                        <br>
+                        <strong>后续展望</strong><br>
+                        • 将继续完善基础功能，盒子功能<br>
+                    </div>
+                </div>
+
+                <!-- v1.2.0 版本更新 -->
+                <div class="announcement-item">
+                    <div class="announcement-header">
+                        <div class="announcement-title-group">
+                            <span class="announcement-tag">上一版本</span>
+                            <span class="announcement-title">v1.2.0 版本 - 中心化架构大升级</span>
+                        </div>
+                        <span class="announcement-date">2026-02-17</span>
+                    </div>
+                    <div class="announcement-content">
+                        <strong>大刀阔斧的底层重构</strong><br>
+                        • 将用户注册从各聊天服务器剥离，统一使用 <strong>Lobby 服务器</strong>，初步建成中心化架构<br>
+                        • 现在无论进入哪个聊天房间，账号身份都通过中央大厅统一认证，体验更舒适<br>
+                        <br>
+                        <strong>全新好友系统</strong><br>
+                        • 添加好友、管理好友列表，随时查看好友状态<br>
+                        • 个人账号个性化加强，可以设置更多个人资料信息<br>
+                        <br>
+                        <strong>安全性大幅提升</strong><br>
+                        • 重构了安全结构，增加了防护机制<br>
+                        • 用户数据更安全，通信过程更可靠<br>
+                    </div>
+                </div>
+
+                <!-- v1.1.0 版本更新 -->
+                <div class="announcement-item">
+                    <div class="announcement-header">
+                        <div class="announcement-title-group">
+                            <span class="announcement-tag">历史版本</span>
+                            <span class="announcement-title">v1.1.0 版本</span>
+                        </div>
+                        <span class="announcement-date">2026-02-16</span>
+                    </div>
+                    <div class="announcement-content">
+                        <strong>新功能</strong><br>
+                        • 新增@用户功能(针对聊天室内在线用户)<br>
+                        • 新增音视频文件预览页面<br>
+                        • 简易指令系统<br>
+                        <br>
+                        <strong>优化</strong><br>
+                        • 优化移动端界面，修复输入框布局<br>
+                        • 底层逻辑重构，实现了插件模块化<br>
+                        <br>
+                        <strong>修复</strong><br>
+                        • 修复历史消息加载问题<br>
+                        • 修复表情显示问题
+                    </div>
+                </div>
+                
+                <div class="announcement-item">
+                    <div class="announcement-header">
+                        <div class="announcement-title-group">
+                            <span class="announcement-title">立项信息</span>
+                        </div>
+                        <span class="announcement-date">2026-02-05</span>
+                    </div>
+                    <div class="announcement-content">
+                        在这时立项，写做一个记录。<br>
+                        初始测试在2026-02-12<br>
+                        和咱一起玩minecraft！！（
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 关于选项卡 - 默认显示 -->
+            <div id="about" class="tab-pane active">
+                <div class="about-header">
+                    <div class="about-icon">
+                        <img src="icon/chatlili.png" alt="Chatlili">
+                    </div>
+                    <div class="about-title">ChatLili</div>
+                    <div class="about-version">版本 1.3.0</div>
+                </div>
+                
+                <div class="about-info">
+                    <div class="about-info-item">
+                        <span class="about-info-label">发布日期</span>
+                        <span class="about-info-value">2026年2月18日</span>
+                    </div>
+                    <div class="about-info-item">
+                        <span class="about-info-label">问句</span>
+                        <span class="about-info-value">不知是为何而做</span>
+                    </div>
+                </div>
+                
+                <div class="about-description">
+                    <strong>关于 ChatLili</strong><br>
+                    一个注重即时通讯的轻量级聊天厅。可以获取chat服务器包开设房间
+                </div>
+                
+                <div class="about-links">
+                    <!-- 点击直接打开邮件客户端，收件人自动填写-->
+                    <a href="mailto:micl_zhou@outlook.com" class="about-link">
+                        <span>🐛</span> 问题&建议反馈
+                    </a>
+                    <a href="#" class="about-link" onclick="showDonate(event)">
+                        <span>❤️</span> 支持作者
+                    </a>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px; color: #72767d; font-size: 12px;">
+                    Copyright © 2026 Norin(NuoeZin). All rights reserved.
+                </div>
+            </div>
+
+            <!-- 教程选项卡 -->
+            <div id="tutorial" class="tab-pane">
+                <div class="about-header" style="margin-bottom: 20px;">
+                    <div class="about-icon" style="width: 60px; height: 60px;">
+                        <span style="font-size: 40px;">📚</span>
+                    </div>
+                    <div class="about-title">使用教程</div>
+                    <div class="about-version">快速上手 ChatLili</div>
+                </div>
+
+                <!-- 简易指令系统 -->
+                <div class="tutorial-section">
+                    <div class="tutorial-title">
+                        简易指令系统
+                    </div>
+                    <div class="tutorial-item">
+                        <div class="tutorial-item-title">
+                            <code>*time</code> <span class="command-badge">新</span>
+                        </div>
+                        <div class="tutorial-item-desc">
+                            查看当前服务器时间。输入 <code>*time</code> 即可显示精确到秒的系统时间。
+                        </div>
+                    </div>
+                    <div class="tutorial-item">
+                        <div class="tutorial-item-title">
+                            <code>*list</code> <span class="command-badge">新</span>
+                        </div>
+                        <div class="tutorial-item-desc">
+                            查看当前房间在线人数。输入 <code>*list</code> 回车即可。
+                        </div>
+                    </div>
+                    <div class="tutorial-item">
+                        <div class="tutorial-item-title">
+                            <code>*help</code> <span class="command-badge">新</span>
+                        </div>
+                        <div class="tutorial-item-desc">
+                            帮助。输入 <code>*help</code> 可以查看目前已有的指令表
+                        </div>
+                    </div>
+                    <div class="tutorial-tip">
+                        <strong>使用提示：</strong> 所有指令都以 <code>*</code> 开头，直接在聊天框输入即可。
+                    </div>
+                </div>
+
+                <!-- 快速入门提示 -->
+                <div class="tutorial-tip" style="margin-top: 20px;">
+                    <strong>快速入门：</strong> 进入聊天室后，可以直接发送文字消息试试。<del>想反馈问题输入 <code>*bug</code> 然后按提示操作。</del>
+                </div>
+            </div>
+
+            <!-- 鸣谢选项卡 - 重新划分为三大板块 -->
+            <div id="credits" class="tab-pane">
+                <div class="about-header" style="margin-bottom: 20px;">
+                    <div class="about-icon" style="width: 60px; height: 60px;">
+                        <span style="font-size: 40px;">🙏</span>
+                    </div>
+                    <div class="about-title">致谢</div>
+                    <div class="about-version">感谢每一位贡献者与开源项目</div>
+                </div>
+
+                <div class="credits-list">
+                    <!-- 板块一：开发团队 -->
+                    <div class="credit-category">
+                        <div class="category-title">开发团队</div>
+                        <div class="category-items">
+                            <!-- Norin 洛林 头像 -->
+                            <div class="credit-person">
+                                <div class="credit-avatar">
+                                    <img src="usli_icon/Norin.jpg" alt="Norin" 
+                                         onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'avatar-letter\'>洛</span>';">
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">Norin 洛林</span><br>
+                                    <span class="credit-role">创石者和后端架构</span>
+                                </div>
+                            </div>
+                            <!-- DeepSeek 头像 -->
+                            <div class="credit-person">
+                                <div class="credit-avatar">
+                                    <img src="usli_icon/DeepSeek.jpg" alt="DeepSeek" 
+                                         onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'avatar-letter\'>D</span>';">
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">DeepSeek</span><br>
+                                    <span class="credit-role">前端网页UI设计</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 板块二：测试与赞助人员（包含新增的两位） -->
+                    <div class="credit-category">
+                        <div class="category-title">测试与赞助人员</div>
+                        <div class="category-items">
+                            <!-- 小阳罪天使 头像 -->
+                            <div class="credit-person">
+                                <div class="credit-avatar">
+                                    <img src="usli_icon/小阳罪天使.jpg" alt="小阳罪天使" 
+                                         onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'avatar-letter\'>阳</span>';">
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">小阳罪天使</span><br>
+                                    <span class="credit-role">初始云服务器通讯测试</span>
+                                </div>
+                            </div>
+                            <!-- W丶康 头像 -->
+                            <div class="credit-person">
+                                <div class="credit-avatar">
+                                    <img src="usli_icon/W丶康.jpg" alt="W丶康" 
+                                         onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'avatar-letter\'>康</span>';">
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">W丶康</span><br>
+                                    <span class="credit-role">初始云服务器通讯测试</span>
+                                </div>
+                            </div>
+                            <!-- 炸毛可乐 新头像 -->
+                            <div class="credit-person">
+                                <div class="credit-avatar">
+                                    <img src="usli_icon/炸毛可乐.jpg" alt="炸毛可乐" 
+                                         onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'avatar-letter\' style=\'font-size:12px;\'>炸毛</span>';">
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">炸毛可乐ᜊ ᜊ</span><br>
+                                    <span class="credit-role">功能测试</span>
+                                </div>
+                            </div>
+                            <!-- 时与清风 新头像 -->
+                            <div class="credit-person">
+                                <div class="credit-avatar">
+                                    <img src="usli_icon/时与清风.jpg" alt="时与清风" 
+                                         onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'avatar-letter\'>清</span>';">
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">时与清风</span><br>
+                                    <span class="credit-role">功能测试</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 板块三：开源项目 -->
+                    <div class="credit-category">
+                        <div class="category-title">开源项目</div>
+                        <div class="category-items">
+                            <!-- Web 框架 -->
+                            <div class="credit-person">
+                                <div class="credit-avatar bg-pink">
+                                    <span class="avatar-letter">F</span>
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">Flask</span><br>
+                                    <span class="credit-role">Pallets · 2010 (BSD-3)</span>
+                                </div>
+                            </div>
+                            <div class="credit-person">
+                                <div class="credit-avatar bg-green">
+                                    <span class="avatar-letter">C</span>
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">Flask-CORS</span><br>
+                                    <span class="credit-role">Cory Dolphin · 2013 (MIT)</span>
+                                </div>
+                            </div>
+                            <!-- WebSocket & 网络库 -->
+                            <div class="credit-person">
+                                <div class="credit-avatar bg-orange">
+                                    <span class="avatar-letter">W</span>
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">websockets</span><br>
+                                    <span class="credit-role">Aymeric Augustin (BSD-3)</span>
+                                </div>
+                            </div>
+                            <div class="credit-person">
+                                <div class="credit-avatar bg-blue">
+                                    <span class="avatar-letter">R</span>
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">Requests</span><br>
+                                    <span class="credit-role">Kenneth Reitz · 2019 (Apache-2.0)</span>
+                                </div>
+                            </div>
+                            <!-- 图像处理 -->
+                            <div class="credit-person">
+                                <div class="credit-avatar bg-purple">
+                                    <span class="avatar-letter">P</span>
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">Pillow</span><br>
+                                    <span class="credit-role">Fredrik Lundh / Alex Clark (HPND)</span>
+                                </div>
+                            </div>
+                            <!-- 数据库 -->
+                            <div class="credit-person">
+                                <div class="credit-avatar bg-rose">
+                                    <span class="avatar-letter">S</span>
+                                </div>
+                                <div class="credit-info">
+                                    <span class="credit-name">SQLite3</span><br>
+                                    <span class="credit-role">公共领域 · 无需许可</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 第三方依赖列表汇总 -->
+                    <div class="credit-category">
+                        <div class="category-title">完整依赖列表</div>
+                        <div class="category-items" style="flex-direction: column; gap: 8px;">
+                            <div class="credit-person" style="flex: none; width: 100%;">
+                                <span style="color: #b9bbbe; font-size: 13px;">Flask, Flask-CORS, websockets, Requests, Pillow, SQLite3</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 致敬所有贡献者 -->
+                    <div style="text-align: center; margin-top: 16px; color: #72767d; font-size: 12px; border-top: 1px dashed #40444b; padding-top: 16px;">
+                        以及所有默默支持 ChatLili 的朋友
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 智能返回函数 =====
+        function goBack() {
+            const referrer = document.referrer;
+            
+            // 优先返回来源页面
+            if (referrer) {
+                window.location.href = referrer;
+            } 
+            // 如果有历史记录，返回上一页
+            else if (window.history.length > 1) {
+                window.history.back();
+            }
+            // 默认返回 index.html
+            else {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // ===== 选项卡切换 =====
+        function switchTab(event, tabId) {
+            // 隐藏所有选项卡
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            
+            // 显示选中的选项卡
+            document.getElementById(tabId).classList.add('active');
+            
+            // 更新按钮状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        // ===== 链接函数 =====
+        function showSourceCode(e) {
+            if (e) e.preventDefault();
+            window.open('https://github.com', '_blank');
+        }
+        
+        function showDonate(e) {
+            if (e) e.preventDefault();
+            alert('感谢支持！目前暂不接捐赠 _(:з」∠)_ ');
+        }
+    </script>
+    <!-- 统一心跳管理 -->
+    <script src="heartbeat.js"></script>
+</body>
+</html>

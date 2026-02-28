@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatLili - 登录</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-box {
+            max-width: 400px;
+            margin: 60px auto;
+            padding: 30px 40px 40px 40px;
+            background: #2f3136;
+            border-radius: 16px;
+            border: 1px solid #40444b;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        /* 返回按钮 - 移到内部左上角 */
+        .back-button {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: #40444b;
+            color: #b9bbbe;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+            z-index: 10;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .back-button:hover {
+            background: #5865f2;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        /* 标题样式 */
+        .login-title {
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 20px 0 30px 0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #b9bbbe;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            background: #40444b;
+            border: 1px solid #202225;
+            border-radius: 8px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus {
+            border-color: #5865f2;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #5865f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+        
+        .btn-login:hover {
+            background: #4752c4;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #72767d;
+            font-size: 14px;
+        }
+        
+        .register-link a {
+            color: #5865f2;
+            text-decoration: none;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            color: #f04747;
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(240,71,71,0.1);
+            border-radius: 8px;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .success-message {
+            color: #3ba55d;
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(59,165,93,0.1);
+            border-radius: 8px;
+            display: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <!-- 返回按钮 - 直接返回index，无对话框 -->
+        <button class="back-button" onclick="window.location.href='index.html'">←</button>
+        
+        <!-- 登录标题 -->
+        <div class="login-title">登录 ChatLili 账号</div>
+        
+        <div class="form-group">
+            <label>用户名</label>
+            <input type="text" id="username" placeholder="输入用户名" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>密码</label>
+            <input type="password" id="password" placeholder="输入密码">
+        </div>
+        
+        <button class="btn-login" onclick="handleLogin()">登录</button>
+        
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        
+        <div class="register-link">
+            还没有账号？ <a href="register.html">立即注册</a>
+        </div>
+    </div>
+    
+    <script>
+        // 大厅服务器地址（从当前页面URL获取）
+        const LOBBY_URL = window.location.origin;
+        
+        // Cookie 工具函数
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+        
+        function deleteCookie(name) {
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+        
+        async function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showError('请输入用户名和密码');
+                return;
+            }
+            
+            try {
+                console.log('登录到大厅:', `${LOBBY_URL}/api/login`);
+                
+                const res = await fetch(`${LOBBY_URL}/api/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                
+                const data = await res.json();
+                console.log('登录响应:', data);
+                
+if (data.status === 'ok') {
+    // 设置 Cookie（30天有效期）
+    setCookie('uid', data.uid, 30);
+    setCookie('username', data.username, 30);
+    setCookie('session_token', data.token, 30);
+    
+    // 保存到 localStorage
+    localStorage.setItem('uid', data.uid);
+    localStorage.setItem('user', data.username);
+    localStorage.setItem('session_token', data.token);
+    
+    showSuccess('登录成功，正在跳转...');
+    
+    // 强制触发心跳（如果心跳管理器已初始化）
+    if (window.HeartbeatManager) {
+        window.HeartbeatManager.forceActive();
+    }
+    
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 1500);
+} else {
+                    showError(data.error || '登录失败');
+                }
+            } catch (e) {
+                console.error('登录错误:', e);
+                showError('连接服务器失败，请检查网络');
+            }
+        }
+        
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = '❌ ' + msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+        
+        function showSuccess(msg) {
+            const el = document.getElementById('successMessage');
+            el.textContent = '✅ ' + msg;
+            el.style.display = 'block';
+        }
+        
+        // 页面加载时
+        document.addEventListener('DOMContentLoaded', function() {
+            // 回车登录
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleLogin();
+            });
+        });
+    </script>
+</body>
+</html>

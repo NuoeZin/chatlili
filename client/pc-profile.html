@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人主页 - ChatLili</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #36393e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .profile-container {
+            max-width: 1000px;
+            width: 95%;
+            margin: 30px auto;
+        }
+        
+        .profile-dialog {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        
+        .dialog-header {
+            background: #36393f;
+            padding: 20px 30px;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .dialog-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        /* 返回按钮样式 - 恢复原样 */
+        .dialog-btn {
+            background: #40444b;
+            color: #b9bbbe;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+        
+        .dialog-btn:hover {
+            background: #5865f2;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        /* 背景图片区域 - 16:9比例 */
+        .profile-background {
+            aspect-ratio: 16/9;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            border-bottom: 1px solid #40444b;
+            background-color: #2f3136;
+        }
+        
+        .profile-background::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(transparent, #2f3136);
+            pointer-events: none;
+        }
+        
+        /* PC端布局 - 左右分栏 */
+        .profile-main {
+            display: flex;
+            min-height: 550px;
+        }
+        
+        /* 左侧 - 用户卡片 */
+        .profile-left {
+            width: 320px;
+            background: #2f3136;
+            border-right: 1px solid #40444b;
+            padding: 20px 20px 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .profile-avatar-wrapper {
+            margin-top: -40px;
+            margin-bottom: 20px;
+            z-index: 20;
+        }
+        
+        .profile-avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 56px;
+            background-size: cover;
+            background-position: center;
+            border: 4px solid #2f3136;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .profile-name {
+            color: #fff;
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+        
+        .profile-uid {
+            color: #00b0f4;
+            font-size: 14px;
+            font-family: monospace;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .profile-stats {
+            width: 100%;
+            margin-top: 20px;
+            border-top: 1px solid #40444b;
+            padding-top: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #40444b;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #b9bbbe;
+            font-size: 15px;
+        }
+        
+        .stat-value {
+            color: #fff;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        /* 右侧 - 详细信息 */
+        .profile-right {
+            flex: 1;
+            background: #36393f;
+            padding: 35px;
+        }
+        
+        .section-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #5865f2;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+        
+        .info-card {
+            background: #2f3136;
+            border-radius: 12px;
+            padding: 22px;
+        }
+        
+        .info-label {
+            color: #b9bbbe;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .info-value {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .signature-box {
+            background: #2f3136;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 35px;
+        }
+        
+        .signature-label {
+            color: #b9bbbe;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        
+        .signature-text {
+            color: #fff;
+            font-size: 16px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #5865f2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #4752c4;
+        }
+        
+        .btn-danger {
+            background: #f04747;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d33f3f;
+        }
+        
+        /* 服务器状态 */
+        .server-status {
+            background: #40444b;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #b9bbbe;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-dot.online {
+            background: #3ba55d;
+        }
+        
+        .status-dot.offline {
+            background: #f04747;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-main {
+                flex-direction: column;
+            }
+            
+            .profile-left {
+                width: auto;
+                border-right: none;
+                border-bottom: 1px solid #40444b;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-dialog">
+            <div class="dialog-header">
+                <button class="dialog-btn" onclick="goBack()">←</button>
+                <span class="dialog-title">个人主页</span>
+                <div style="width: 40px;"></div> <!-- 占位，保持对称 -->
+            </div>
+            
+            <!-- 背景图片区域 -->
+            <div id="profileBackground" class="profile-background"></div>
+            
+            <div class="profile-main">
+                <!-- 左侧 - 用户卡片 -->
+                <div class="profile-left">
+                    <div class="profile-avatar-wrapper">
+                        <div id="profileAvatar" class="profile-avatar">?</div>
+                    </div>
+                    <div class="profile-name" id="profileName">加载中...</div>
+                    <div class="profile-uid" id="profileUid">UID: 加载中...</div>
+                    
+                    <!-- 服务器状态 -->
+                    <div class="server-status" id="serverStatus">
+                        <span class="status-dot" id="statusDot"></span>
+                        <span id="statusText">检查服务器状态...</span>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">好友数量</span>
+                            <span class="stat-value" id="statFriends">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">追随者</span>
+                            <span class="stat-value" id="statFollowers">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧 - 详细信息 -->
+                <div class="profile-right">
+                    <div class="section-title">基本信息</div>
+                    
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-label">注册邮箱</div>
+                            <div class="info-value" id="detailEmail">未设置</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">注册时间</div>
+                            <div class="info-value" id="detailDate">未知</div>
+                        </div>
+                    </div>
+                    
+                    <div class="signature-box">
+                        <div class="signature-label">个人签名</div>
+                        <div class="signature-text" id="profileSignature">这个人很懒，还没有填写签名</div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn btn-primary" onclick="goToSettings()">
+                            编辑资料
+                        </button>
+                        <button class="action-btn btn-danger" onclick="logout()">
+                            退出登录
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 全局变量 =====
+        const LOBBY_URL = window.location.origin;
+        let uid = null;
+        let username = null;
+        
+        // ===== Cookie 工具函数 =====
+        function getCookie(name) {
+            const cookieName = name + "=";
+            const cookies = document.cookie.split(';');
+            for(let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.indexOf(cookieName) === 0) {
+                    return cookie.substring(cookieName.length, cookie.length);
+                }
+            }
+            return "";
+        }
+        
+        function deleteCookie(name) {
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+        
+        // ===== 从URL参数或本地存储获取值 =====
+        function getParamOrStorage(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlValue = urlParams.get(name);
+            if (urlValue) return urlValue;
+            
+            if (name === 'uid') return localStorage.getItem('uid') || getCookie('uid');
+            if (name === 'username') return localStorage.getItem('user') || getCookie('username');
+            return null;
+        }
+        
+        // ===== 更新页面显示的用户名 =====
+        function updateDisplayedUsername() {
+            // 优先从URL参数获取，因为settings页面跳转时会带新用户名
+            const urlUsername = getUrlParam('username');
+            if (urlUsername) {
+                username = urlUsername;
+                document.getElementById('profileName').textContent = username;
+                document.getElementById('profileUid').textContent = `UID: ${uid}`;
+                return true;
+            }
+            
+            // 其次从本地存储获取
+            const storedUsername = localStorage.getItem('user') || getCookie('username');
+            if (storedUsername && storedUsername !== username) {
+                username = storedUsername;
+                document.getElementById('profileName').textContent = username;
+                document.getElementById('profileUid').textContent = `UID: ${uid}`;
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // ===== 页面导航 =====
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        function goToSettings() {
+            window.location.href = `settings.html?uid=${uid}&username=${encodeURIComponent(username)}`;
+        }
+        
+function logout() {
+    if (confirm('确定要退出登录吗？')) {
+        // 先停止心跳
+        if (window.HeartbeatManager) {
+            window.HeartbeatManager.stop();
+        }
+        
+        // 清除所有登录信息
+        localStorage.removeItem('uid');
+        localStorage.removeItem('user');
+        localStorage.removeItem('session_token');
+        deleteCookie('uid');
+        deleteCookie('username');
+        deleteCookie('session_token');
+        
+        window.location.href = 'index.html';
+    }
+}
+        
+        function getUrlParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // ===== 检查服务器状态 =====
+        async function checkServerStatus() {
+            try {
+                const res = await fetch(`${LOBBY_URL}/servers`, { timeout: 3000 });
+                if (res.ok) {
+                    document.getElementById('statusDot').className = 'status-dot online';
+                    document.getElementById('statusText').textContent = '大厅服务器在线';
+                } else {
+                    document.getElementById('statusDot').className = 'status-dot offline';
+                    document.getElementById('statusText').textContent = '大厅服务器异常';
+                }
+            } catch (e) {
+                document.getElementById('statusDot').className = 'status-dot offline';
+                document.getElementById('statusText').textContent = '大厅服务器离线';
+            }
+        }
+        
+// ===== 获取好友数量和追随者数量 =====
+async function loadStats() {
+    const token = getCookie('session_token') || localStorage.getItem('session_token');
+    
+    try {
+        const res = await fetch(`${LOBBY_URL}/api/friends/count/${uid}?token=${token}`, {
+            credentials: 'include'
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('statFriends').textContent = data.friends || 0;
+            document.getElementById('statFollowers').textContent = data.followers || 0;
+        }
+    } catch (e) {
+        console.error('获取统计数据失败:', e);
+    }
+}
+        
+        // ===== 加载用户信息 =====
+        async function loadUserInfo() {
+            uid = getParamOrStorage('uid');
+            username = getParamOrStorage('username');
+            
+            if (!uid || !username) {
+                alert('未登录，请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 立即显示用户名（从URL参数或本地存储）
+            document.getElementById('profileName').textContent = username;
+            document.getElementById('profileUid').textContent = `UID: ${uid}`;
+            
+            // 加载头像
+            const avatarContainer = document.getElementById('profileAvatar');
+            const avatarUrl = `${LOBBY_URL}/api/avatar/${uid}?t=${Date.now()}`;
+            
+            const img = new Image();
+            img.onload = function() {
+                avatarContainer.style.backgroundImage = `url(${avatarUrl})`;
+                avatarContainer.style.backgroundSize = 'cover';
+                avatarContainer.style.backgroundPosition = 'center';
+                avatarContainer.textContent = '';
+            };
+            img.onerror = function() {
+                avatarContainer.textContent = username.charAt(0).toUpperCase();
+            };
+            img.src = avatarUrl;
+            
+            // 加载背景图片
+            const backgroundUrl = `${LOBBY_URL}/api/background/${uid}?t=${Date.now()}`;
+            fetch(backgroundUrl)
+                .then(res => {
+                    if (res.ok) {
+                        return res.blob();
+                    }
+                    throw new Error('背景加载失败');
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    document.getElementById('profileBackground').style.backgroundImage = `url(${url})`;
+                })
+                .catch(() => {});
+            
+            // 加载签名
+            const savedSig = localStorage.getItem(`sig_${uid}`);
+            if (savedSig) {
+                document.getElementById('profileSignature').textContent = savedSig;
+            }
+            
+            // 从大厅获取用户详细信息（异步，不影响界面显示）
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/user/${uid}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    const email = data.email || '未设置';
+                    document.getElementById('detailEmail').textContent = email;
+                    
+                    if (data.created_at) {
+                        const date = new Date(data.created_at * 1000);
+                        const dateStr = date.toLocaleDateString('zh-CN');
+                        document.getElementById('detailDate').textContent = dateStr;
+                    }
+                }
+            } catch (e) {
+                console.error('获取用户详情失败:', e);
+            }
+            
+            // 加载统计数据
+            await loadStats();
+            
+            // 检查服务器状态
+            checkServerStatus();
+        }
+        
+        // 监听页面显示事件，确保每次返回页面时都更新用户名
+        window.addEventListener('pageshow', function(event) {
+            // 从缓存加载时也更新
+            updateDisplayedUsername();
+        });
+        
+        document.addEventListener('DOMContentLoaded', loadUserInfo);
+    </script>
+    <!-- 统一心跳管理 -->
+    <script src="heartbeat.js"></script>
+</body>
+</html>

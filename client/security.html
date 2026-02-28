@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账户安全 - ChatLili</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #36393e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .security-container {
+            max-width: 500px;
+            width: 90%;
+            margin: 20px auto;
+        }
+        
+        .security-dialog {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        
+        .dialog-header {
+            background: #36393f;
+            padding: 20px 24px;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .dialog-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .dialog-btn {
+            background: #40444b;
+            color: #b9bbbe;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+        
+        .dialog-btn:hover {
+            background: #5865f2;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .security-content {
+            padding: 30px;
+        }
+        
+        .security-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #40444b;
+        }
+        
+        .security-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .section-title {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 信息卡片 */
+        .info-card {
+            background: #36393f;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 25px;
+            border: 1px solid #40444b;
+        }
+        
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #40444b;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #b9bbbe;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #fff;
+            font-weight: 500;
+            font-size: 14px;
+            background: #40444b;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-family: monospace;
+        }
+        
+        /* 表单组 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #b9bbbe;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #40444b;
+            border: 1px solid #202225;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus {
+            border-color: #5865f2;
+            box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.2);
+        }
+        
+        .form-group input::placeholder {
+            color: #72767d;
+        }
+        
+        .password-hint {
+            color: #72767d;
+            font-size: 12px;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .password-match {
+            color: #3ba55d;
+        }
+        
+        .password-mismatch {
+            color: #f04747;
+        }
+        
+        /* 按钮 */
+        .btn-save {
+            background: #5865f2;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .btn-save:hover {
+            background: #4752c4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+        }
+        
+        .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* 消息提示 */
+        .success-message {
+            color: #3ba55d;
+            text-align: center;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(59,165,93,0.1);
+            border-radius: 12px;
+            display: none;
+            font-size: 14px;
+            border: 1px solid rgba(59,165,93,0.3);
+        }
+        
+        .error-message {
+            color: #f04747;
+            text-align: center;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(240,71,71,0.1);
+            border-radius: 12px;
+            display: none;
+            font-size: 14px;
+            border: 1px solid rgba(240,71,71,0.3);
+        }
+        
+        /* 加载遮罩 */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #40444b;
+            border-top-color: #5865f2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        .loading-text {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 服务器状态 */
+        .server-status {
+            background: #40444b;
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            color: #b9bbbe;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-dot.online {
+            background: #3ba55d;
+            box-shadow: 0 0 8px #3ba55d;
+        }
+        
+        .status-dot.offline {
+            background: #f04747;
+        }
+        
+        /* 分隔线 */
+        .divider {
+            height: 1px;
+            background: #40444b;
+            margin: 30px 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载遮罩层 -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在处理...</div>
+    </div>
+
+    <div class="security-container">
+        <div class="security-dialog">
+            <div class="dialog-header">
+                <button class="dialog-btn" onclick="goBack()">←</button>
+                <span class="dialog-title">账户安全</span>
+                <button class="dialog-btn" onclick="goToSettings()">👤</button>
+            </div>
+            
+            <div class="security-content">
+                <!-- 服务器状态 -->
+                <div class="server-status" id="serverStatus">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">检查大厅服务器状态...</span>
+                </div>
+                
+                <!-- 用户信息卡片 -->
+                <div class="info-card">
+                    <div class="info-row">
+                        <span class="info-label">UID</span>
+                        <span class="info-value" id="displayUid">加载中...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">用户名</span>
+                        <span class="info-value" id="displayUsername">加载中...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">邮箱</span>
+                        <span class="info-value" id="displayEmail">加载中...</span>
+                    </div>
+                </div>
+                
+                <!-- 修改用户名 -->
+                <div class="security-section">
+                    <div class="section-title">
+                        <span>👤</span> 修改用户名
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="username" placeholder="输入新用户名" value="">
+                        <div class="password-hint">修改的用戶名在离开个人信息后生效</div>
+                    </div>
+                </div>
+                
+                <!-- 修改密码 -->
+                <div class="security-section">
+                    <div class="section-title">
+                        <span>🔐</span> 修改密码
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>当前密码</label>
+                        <input type="password" id="currentPassword" placeholder="输入当前密码">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>新密码</label>
+                        <input type="password" id="newPassword" placeholder="至少6位">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>确认新密码</label>
+                        <input type="password" id="confirmPassword" placeholder="再次输入新密码">
+                        <div id="passwordMatchHint" class="password-hint"></div>
+                    </div>
+                </div>
+                
+                <!-- 修改邮箱 -->
+                <div class="security-section">
+                    <div class="section-title">
+                        <span>📧</span> 修改邮箱
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>新邮箱</label>
+                        <input type="email" id="email" placeholder="输入新邮箱" value="">
+                        <div class="password-hint">用于找回密码和接收通知</div>
+                    </div>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <div id="successMessage" class="success-message"></div>
+                <div id="errorMessage" class="error-message"></div>
+                
+                <button class="btn-save" onclick="saveSecurity()" id="saveBtn">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 全局变量 =====
+        const LOBBY_URL = window.location.origin;
+        let uid = null;
+        let username = null;
+        let email = null;
+        let originalUsername = null;
+        let originalEmail = null;
+        
+        // ===== Cookie 工具函数 =====
+        function getCookie(name) {
+            const cookieName = name + "=";
+            const cookies = document.cookie.split(';');
+            for(let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.indexOf(cookieName) === 0) {
+                    return cookie.substring(cookieName.length, cookie.length);
+                }
+            }
+            return "";
+        }
+        
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+        
+        function deleteCookie(name) {
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+        
+        // ===== 页面导航 =====
+        function goBack() {
+            const platform = detectPlatform();
+            if (platform === 'mobile') {
+                window.location.href = `profile.html?uid=${uid}&username=${encodeURIComponent(username)}`;
+            } else {
+                window.location.href = `pc-profile.html?uid=${uid}&username=${encodeURIComponent(username)}`;
+            }
+        }
+        
+        function goToSettings() {
+            window.location.href = `settings.html?uid=${uid}&username=${encodeURIComponent(username)}`;
+        }
+        
+        function detectPlatform() {
+            const ua = navigator.userAgent.toLowerCase();
+            return /mobile|android|iphone|ipad|phone/i.test(ua) ? 'mobile' : 'pc';
+        }
+        
+        // ===== 密码匹配检查 =====
+        document.getElementById('confirmPassword')?.addEventListener('input', function() {
+            const newPwd = document.getElementById('newPassword').value;
+            const confirmPwd = this.value;
+            const hint = document.getElementById('passwordMatchHint');
+            
+            if (confirmPwd.length === 0) {
+                hint.textContent = '';
+            } else if (newPwd === confirmPwd) {
+                hint.textContent = '✓ 密码匹配';
+                hint.className = 'password-hint password-match';
+            } else {
+                hint.textContent = '✗ 密码不一致';
+                hint.className = 'password-hint password-mismatch';
+            }
+        });
+        
+        // ===== 检查服务器状态 =====
+        async function checkServerStatus() {
+            try {
+                const res = await fetch(`${LOBBY_URL}/servers`, { timeout: 3000 });
+                if (res.ok) {
+                    document.getElementById('statusDot').className = 'status-dot online';
+                    document.getElementById('statusText').textContent = '大厅服务器在线';
+                } else {
+                    document.getElementById('statusDot').className = 'status-dot offline';
+                    document.getElementById('statusText').textContent = '大厅服务器异常';
+                }
+            } catch (e) {
+                document.getElementById('statusDot').className = 'status-dot offline';
+                document.getElementById('statusText').textContent = '大厅服务器离线';
+            }
+        }
+        
+        // ===== 加载用户信息 =====
+        async function loadUserInfo() {
+            uid = getUrlParam('uid') || localStorage.getItem('uid') || getCookie('uid');
+            username = getUrlParam('username') || localStorage.getItem('user') || getCookie('username');
+            
+            if (!uid || !username) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 显示基本信息
+            document.getElementById('displayUid').textContent = uid;
+            document.getElementById('displayUsername').textContent = username;
+            document.getElementById('username').value = username;
+            originalUsername = username;
+            
+            try {
+                // 从大厅获取用户信息
+                const res = await fetch(`${LOBBY_URL}/api/user/${uid}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    email = data.email || '';
+                    document.getElementById('displayEmail').textContent = email || '未设置';
+                    document.getElementById('email').value = email || '';
+                    originalEmail = email;
+                }
+            } catch (e) {
+                console.error('获取用户信息失败:', e);
+            }
+            
+            // 检查服务器状态
+            checkServerStatus();
+        }
+        
+        function getUrlParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // ===== 保存安全设置 =====
+        async function saveSecurity() {
+            const newUsername = document.getElementById('username').value.trim();
+            const newEmail = document.getElementById('email').value.trim();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            if (!token) {
+                showError('未登录，请重新登录');
+                setTimeout(() => window.location.href = 'login.html', 2000);
+                return;
+            }
+            
+            // 验证用户名
+            if (newUsername.length < 2) {
+                showError('用户名至少2个字符');
+                return;
+            }
+            
+            // 验证邮箱格式
+            if (newEmail && !newEmail.includes('@')) {
+                showError('邮箱格式不正确');
+                return;
+            }
+            
+            // 验证密码修改
+            if (newPassword || confirmPassword || currentPassword) {
+                if (!currentPassword) {
+                    showError('修改密码需要输入当前密码');
+                    return;
+                }
+                if (newPassword.length < 6) {
+                    showError('新密码至少6位');
+                    return;
+                }
+                if (newPassword !== confirmPassword) {
+                    showError('两次输入的新密码不一致');
+                    return;
+                }
+            }
+            
+            // 显示加载遮罩
+            document.getElementById('loadingOverlay').classList.add('show');
+            document.getElementById('saveBtn').disabled = true;
+            
+            let success = true;
+            let errorMessages = [];
+            let changes = [];
+            
+            // 1. 修改用户名（如果改变了）
+            if (newUsername !== originalUsername) {
+                try {
+                    const res = await fetch(`${LOBBY_URL}/api/change_username`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            uid: uid,
+                            new_username: newUsername,
+                            session_token: token
+                        }),
+                        credentials: 'include'
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (data.status === 'ok') {
+                        changes.push('用户名');
+                        // 更新本地存储的用户名
+                        username = newUsername;
+                        originalUsername = newUsername;
+                        localStorage.setItem('user', newUsername);
+                        setCookie('username', newUsername, 30);
+                        document.getElementById('displayUsername').textContent = newUsername;
+                    } else {
+                        success = false;
+                        errorMessages.push('修改用户名失败: ' + (data.error || '未知错误'));
+                    }
+                } catch (e) {
+                    success = false;
+                    errorMessages.push('修改用户名失败: ' + e.message);
+                }
+            }
+            
+            // 2. 修改邮箱（如果改变了）
+            if (newEmail !== originalEmail) {
+                try {
+                    const res = await fetch(`${LOBBY_URL}/api/change_email`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            uid: uid,
+                            new_email: newEmail,
+                            session_token: token
+                        }),
+                        credentials: 'include'
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (data.status === 'ok') {
+                        changes.push('邮箱');
+                        email = newEmail;
+                        originalEmail = newEmail;
+                        document.getElementById('displayEmail').textContent = newEmail || '未设置';
+                    } else {
+                        success = false;
+                        errorMessages.push('修改邮箱失败: ' + (data.error || '未知错误'));
+                    }
+                } catch (e) {
+                    success = false;
+                    errorMessages.push('修改邮箱失败: ' + e.message);
+                }
+            }
+            
+            // 3. 修改密码（如果需要）
+            if (newPassword && currentPassword) {
+                try {
+                    const res = await fetch(`${LOBBY_URL}/api/change_password`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            uid: uid,
+                            old_password: currentPassword,
+                            new_password: newPassword
+                        }),
+                        credentials: 'include'
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (data.status === 'ok') {
+                        changes.push('密码');
+                        // 清空密码输入框
+                        document.getElementById('currentPassword').value = '';
+                        document.getElementById('newPassword').value = '';
+                        document.getElementById('confirmPassword').value = '';
+                    } else {
+                        success = false;
+                        errorMessages.push('修改密码失败: ' + (data.error || '未知错误'));
+                    }
+                } catch (e) {
+                    success = false;
+                    errorMessages.push('修改密码失败: ' + e.message);
+                }
+            }
+            
+            // 隐藏加载遮罩
+            document.getElementById('loadingOverlay').classList.remove('show');
+            document.getElementById('saveBtn').disabled = false;
+            
+            if (success) {
+                if (changes.length > 0) {
+                    showSuccess(`修改成功: ${changes.join('、')}`);
+                } else {
+                    showSuccess('没有需要保存的修改');
+                }
+                setTimeout(() => {
+                    if (changes.length > 0) {
+                        // 刷新页面以显示最新信息
+                        location.reload();
+                    }
+                }, 1500);
+            } else {
+                showError(errorMessages.join('；'));
+            }
+        }
+        
+        // ===== 消息提示 =====
+        function showSuccess(msg) {
+            const el = document.getElementById('successMessage');
+            el.textContent = '✅ ' + msg;
+            el.style.display = 'block';
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 3000);
+        }
+        
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = '❌ ' + msg;
+            el.style.display = 'block';
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 3000);
+        }
+        
+        // ===== 初始化 =====
+        document.addEventListener('DOMContentLoaded', loadUserInfo);
+    </script>
+    <!-- 统一心跳管理 -->
+    <script src="heartbeat.js"></script>
+</body>
+</html>

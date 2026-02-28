@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ChatLili - 服务器列表</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 大厅专用样式 - 紧凑版 */
+        body {
+            background: #36393e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .lobby-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #2f3136;
+        }
+        
+        /* 顶栏 - 更紧凑，适配移动端 */
+        .lobby-header {
+            height: 56px;
+            background: #2f3136;
+            border-bottom: 1px solid #202225;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            flex: 1;
+        }
+        
+        /* 菜单按钮 - 修复正圆 */
+        .menu-toggle {
+            background: #40444b;
+            color: #b9bbbe;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 18px;
+            padding: 0;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        
+        .menu-toggle:hover {
+            background: #5865f2;
+            color: white;
+        }
+        
+        .lobby-title {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .online-count {
+            background: #40444b;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #b9bbbe;
+            white-space: nowrap;
+        }
+        
+        /* 手动连接按钮 - 移动端优化 */
+        .connect-btn {
+            background: #5865f2;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: background 0.2s;
+            height: 32px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        
+        .connect-btn:hover {
+            background: #4752c4;
+        }
+        
+        .connect-btn span {
+            font-size: 16px;
+        }
+        
+        /* 左侧滑动菜单 */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            display: none;
+        }
+        
+        .menu-overlay.show {
+            display: block;
+        }
+        
+        .left-menu {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 260px;
+            height: 100vh;
+            background: #2f3136;
+            border-right: 1px solid #202225;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            transition: left 0.3s ease;
+            box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+        }
+        
+        .left-menu.show {
+            left: 0;
+        }
+        
+        .menu-header {
+            padding: 20px 16px;
+            border-bottom: 1px solid #202225;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .menu-header .logo span {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .menu-close {
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            font-size: 22px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .menu-close:hover {
+            background: #40444b;
+            color: #fff;
+        }
+        
+        .menu-user {
+            padding: 14px 16px;
+            background: #36393f;
+            border-radius: 8px;
+            margin: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .menu-user:hover {
+            background: #40444b;
+        }
+        
+        .menu-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .menu-user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .menu-user-name {
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .menu-user-status {
+            color: #3ba55d;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .menu-user-status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #3ba55d;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .menu-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px 8px;
+        }
+        
+        .menu-item {
+            padding: 12px 16px;
+            margin: 2px 0;
+            color: #b9bbbe;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .menu-item:hover {
+            background: #40444b;
+            color: #fff;
+        }
+        
+        .menu-item.active {
+            background: #40444b;
+            color: #fff;
+        }
+        
+        .menu-item span {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        /* 刷新按钮移到菜单里 */
+        .menu-refresh {
+            margin-top: auto;
+            border-top: 1px solid #40444b;
+            padding: 12px 16px;
+            color: #b9bbbe;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .menu-refresh:hover {
+            background: #40444b;
+            color: #fff;
+        }
+        
+        .menu-refresh span {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .menu-refresh.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        .menu-refresh.loading span {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 未登录状态 */
+        .menu-login-prompt {
+            padding: 16px;
+            text-align: center;
+            color: #72767d;
+        }
+        
+        .menu-login-prompt button {
+            margin-top: 8px;
+            padding: 8px 16px;
+            background: #5865f2;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 13px;
+        }
+        
+        /* 服务器列表区域 */
+        .servers-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: #36393e;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .servers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .server-card {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 12px;
+            padding: 18px;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .server-card:hover {
+            border-color: #5865f2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .server-card.online::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #3ba55d;
+        }
+        
+        .server-card.offline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #f04747;
+        }
+        
+        .server-name {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            padding-left: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .status-badge.online {
+            background: rgba(59, 165, 93, 0.2);
+            color: #3ba55d;
+        }
+        
+        .status-badge.offline {
+            background: rgba(240, 71, 71, 0.2);
+            color: #f04747;
+        }
+        
+        .server-description {
+            color: #b9bbbe;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            border-left: 2px solid #5865f2;
+            min-height: 60px;
+            max-height: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        
+        .server-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #40444b;
+            font-size: 12px;
+        }
+        
+        /* 移除IP显示，只保留最后活跃时间 */
+        .last-seen {
+            color: #72767d;
+        }
+        
+        /* 移除server-id样式 */
+        
+        .empty-state {
+            text-align: center;
+            color: #72767d;
+            padding: 40px 20px;
+            background: #2f3136;
+            border-radius: 12px;
+            border: 2px dashed #40444b;
+        }
+        
+        .empty-icon {
+            width: 43.2px; /* 48px * 0.9 = 43.2px */
+            height: 43.2px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .empty-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #72767d;
+            padding: 30px;
+            font-size: 14px;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+            border: 2px solid #5865f2;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .connect-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .connect-modal.show {
+            display: flex;
+        }
+        
+        .connect-modal-content {
+            background: #2f3136;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 360px;
+            border: 1px solid #40444b;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        
+        .connect-modal-content h3 {
+            color: #fff;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+        
+        .connect-modal-content input {
+            width: 100%;
+            padding: 12px;
+            background: #40444b;
+            border: 1px solid #202225;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .modal-btn-primary {
+            background: #5865f2;
+            color: white;
+        }
+        
+        .modal-btn-primary:hover {
+            background: #4752c4;
+        }
+        
+        .modal-btn-secondary {
+            background: #4f545c;
+            color: white;
+        }
+        
+        .modal-btn-secondary:hover {
+            background: #5d6269;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 480px) {
+            .lobby-header {
+                padding: 0 8px;
+            }
+            
+            .lobby-title {
+                font-size: 16px;
+            }
+            
+            .online-count {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+            
+            .connect-btn {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+            
+            .servers-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .server-name {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lobby-container">
+        <!-- 顶栏 - 简洁版，已移除刷新按钮 -->
+        <div class="lobby-header">
+            <div class="header-left">
+                <!-- 菜单按钮 -->
+                <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+                
+                <div class="lobby-title">
+                    在线房间
+                    <span class="online-count" id="onlineCount">0</span>
+                </div>
+            </div>
+            
+            <!-- 手动连接按钮 -->
+            <button class="connect-btn" onclick="showConnectModal()">
+                <span>+</span> 连接
+            </button>
+        </div>
+
+        <!-- 菜单遮罩层 -->
+        <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+        
+        <!-- 左侧滑动菜单 - 增加刷新按钮 -->
+        <div id="leftMenu" class="left-menu">
+            <div class="menu-header">
+                <div class="logo">
+                    <span>ChatLili</span>
+                </div>
+                <button class="menu-close" onclick="toggleMenu()">✕</button>
+            </div>
+            
+            <!-- 用户信息区域（动态显示） -->
+            <div id="menuUserSection">
+                <!-- 未登录状态 -->
+                <div id="menuNotLoggedIn" class="menu-login-prompt">
+                    <div>当前未登录</div>
+                    <button onclick="window.location.href='login.html'">登录 / 注册</button>
+                </div>
+                
+                <!-- 已登录状态 - 点击整个卡片进入个人主页 -->
+                <div id="menuLoggedIn" style="display: none;">
+                    <div class="menu-user" onclick="goToProfile()">
+                        <div id="menuAvatar" class="menu-user-avatar">?</div>
+                        <div class="menu-user-info">
+                            <div id="menuUserName" class="menu-user-name">加载中...</div>
+                            <div class="menu-user-status">在线</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 菜单项 - 激活好友功能，直接跳转到friends.html -->
+            <div class="menu-items">
+                <div class="menu-item" onclick="window.location.href='friends.html'">
+                    好友
+                </div>
+                <div class="menu-item" onclick="navigateTo('box')">
+                    盒子
+                </div>
+                <div class="menu-item" onclick="navigateTo('about')">
+                    其他
+                </div>
+            </div>
+            
+            <!-- 刷新按钮移到菜单底部 -->
+            <div id="menuRefresh" class="menu-refresh" onclick="refreshServers()">
+                <span>↻</span> 刷新房间列表
+            </div>
+        </div>
+
+        <!-- 服务器列表区域 -->
+        <div class="servers-area">
+            <div id="serversGrid" class="servers-grid">
+                <div class="loading">加载房间列表中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 手动连接弹窗 -->
+    <div id="connectModal" class="connect-modal">
+        <div class="connect-modal-content">
+            <h3>手动连接服务器</h3>
+            <input type="text" id="modalIp" placeholder="服务器IP或域名" value="">
+            <input type="text" id="modalPort" placeholder="WebSocket端口(默认8765)" value="">
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" onclick="connectFromModal()">连接</button>
+                <button class="modal-btn modal-btn-secondary" onclick="hideConnectModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let servers = [];
+        let loading = false;
+        let refreshLoading = false;
+        
+        // ===== 平台检测 =====
+        function detectPlatform() {
+            const ua = navigator.userAgent.toLowerCase();
+            const isMobile = /mobile|android|iphone|ipad|phone/i.test(ua);
+            const isTablet = /ipad|tablet/i.test(ua);
+            
+            if (isMobile && !isTablet) {
+                return 'mobile';
+            } else {
+                return 'pc';
+            }
+        }
+        
+        // ===== Cookie 工具函数 =====
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+        
+        function getCookie(name) {
+            const cookieName = name + "=";
+            const cookies = document.cookie.split(';');
+            for(let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.indexOf(cookieName) === 0) {
+                    return cookie.substring(cookieName.length, cookie.length);
+                }
+            }
+            return "";
+        }
+        
+        function deleteCookie(name) {
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+        
+        // ===== 检查登录状态 =====
+        function checkLoginStatus() {
+            const uid = getCookie('uid') || localStorage.getItem('uid');
+            const username = getCookie('username') || localStorage.getItem('user');
+            const sessionToken = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            if (uid && username && sessionToken) {
+                localStorage.setItem('uid', uid);
+                localStorage.setItem('user', username);
+                localStorage.setItem('session_token', sessionToken);
+                setCookie('uid', uid, 30);
+                setCookie('username', username, 30);
+                setCookie('session_token', sessionToken, 30);
+                
+                return { isLoggedIn: true, uid, username, sessionToken };
+            }
+            
+            return { isLoggedIn: false };
+        }
+        
+        // ===== 导航函数 =====
+        function navigateTo(page) {
+            const loginStatus = checkLoginStatus();
+            
+            if (page === 'about') {
+                toggleMenu();
+                window.location.href = 'about.html';
+                return;
+            }
+            
+            if (page === 'friends') {
+                // 好友功能已直接使用window.location.href，不会进入这里
+                return;
+            }
+            
+            if (!loginStatus.isLoggedIn) {
+                alert('请先登录后使用此功能');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            toggleMenu();
+            
+            switch(page) {
+                case 'box':
+                    window.location.href = 'box.html';
+                    break;
+            }
+        }
+        
+        // ===== 进入个人主页 =====
+        function goToProfile() {
+            const loginStatus = checkLoginStatus();
+            
+            if (!loginStatus.isLoggedIn) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            toggleMenu();
+            
+            // 根据平台选择不同的个人主页
+            const platform = detectPlatform();
+            if (platform === 'mobile') {
+                window.location.href = `profile.html?uid=${loginStatus.uid}&username=${encodeURIComponent(loginStatus.username)}`;
+            } else {
+                window.location.href = `pc-profile.html?uid=${loginStatus.uid}&username=${encodeURIComponent(loginStatus.username)}`;
+            }
+        }
+        
+// 在 index.html 中找到 connectFromCard 函数，替换为：
+
+// ===== 从卡片连接 =====
+async function connectFromCard(ip, port, name, httpPort) {
+    const loginStatus = checkLoginStatus();
+    
+    if (!loginStatus.isLoggedIn) {
+        // 未登录，直接跳转到登录页
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    // 已登录，先检查是否需要密码
+    try {
+        const response = await fetch(`http://${ip}:${httpPort}/api/room/password/status`);
+        const data = await response.json();
+        
+        if (data.requires_password) {
+            // 需要密码，跳转到密码输入页面
+            window.location.href = `chat_password.html?ip=${ip}&port=${port}&http_port=${httpPort}&name=${encodeURIComponent(name)}`;
+        } else {
+            // 不需要密码，直接进入
+            localStorage.setItem('ip', ip);
+            localStorage.setItem('port', port);
+            localStorage.setItem('serverHttpPort', httpPort);
+            localStorage.setItem('serverName', name || '未命名服务器');
+            
+            window.location.href = 'chat.html';
+        }
+    } catch (error) {
+        console.error('检查密码状态失败:', error);
+        // 出错时默认进入（兼容旧服务器）
+        localStorage.setItem('ip', ip);
+        localStorage.setItem('port', port);
+        localStorage.setItem('serverHttpPort', httpPort);
+        localStorage.setItem('serverName', name || '未命名服务器');
+        
+        window.location.href = 'chat.html';
+    }
+}
+        
+        // ===== 从弹窗连接 =====
+        function connectFromModal() {
+            const ip = document.getElementById('modalIp').value.trim();
+            const port = document.getElementById('modalPort').value.trim() || '8765';
+            
+            if (!ip) {
+                alert('请输入IP地址');
+                return;
+            }
+            
+            const loginStatus = checkLoginStatus();
+            
+            if (!loginStatus.isLoggedIn) {
+                // 未登录，直接跳转到登录页
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 已登录，尝试连接
+            fetch(`http://${ip}:5000/info`, { timeout: 3000 })
+                .then(res => res.json())
+                .then(data => {
+                    localStorage.setItem('ip', ip);
+                    localStorage.setItem('port', port);
+                    localStorage.setItem('serverName', data.name || '未命名服务器');
+                    localStorage.setItem('serverHttpPort', data.http_port || 5000);
+                    
+                    const platform = detectPlatform();
+                    window.location.href = platform === 'mobile' ? 'mobile.html' : 'chat.html';
+                })
+                .catch(err => {
+                    console.error('获取服务器信息失败:', err);
+                    
+                    if (confirm('无法获取服务器信息，是否尝试直接连接？')) {
+                        localStorage.setItem('ip', ip);
+                        localStorage.setItem('port', port);
+                        localStorage.setItem('serverName', '未知服务器');
+                        localStorage.setItem('serverHttpPort', 5000);
+                        
+                        const platform = detectPlatform();
+                        window.location.href = platform === 'mobile' ? 'mobile.html' : 'chat.html';
+                    }
+                });
+        }
+        
+        // ===== 加载用户信息 =====
+        function loadUserInfo() {
+            const loginStatus = checkLoginStatus();
+            
+            if (loginStatus.isLoggedIn) {
+                document.getElementById('menuNotLoggedIn').style.display = 'none';
+                document.getElementById('menuLoggedIn').style.display = 'block';
+                document.getElementById('menuUserName').textContent = loginStatus.username;
+                
+                const avatarContainer = document.getElementById('menuAvatar');
+                const lobbyUrl = window.location.origin;
+                
+                const avatarUrl = `${lobbyUrl}/api/avatar/${loginStatus.uid}?t=${Date.now()}`;
+                const img = new Image();
+                img.onload = function() {
+                    avatarContainer.style.backgroundImage = `url(${avatarUrl})`;
+                    avatarContainer.style.backgroundSize = 'cover';
+                    avatarContainer.style.backgroundPosition = 'center';
+                    avatarContainer.textContent = '';
+                };
+                img.onerror = function() {
+                    avatarContainer.textContent = loginStatus.username.charAt(0).toUpperCase();
+                };
+                img.src = avatarUrl;
+            } else {
+                document.getElementById('menuNotLoggedIn').style.display = 'block';
+                document.getElementById('menuLoggedIn').style.display = 'none';
+            }
+        }
+        
+        // ===== 菜单控制 =====
+        function toggleMenu() {
+            const menu = document.getElementById('leftMenu');
+            const overlay = document.getElementById('menuOverlay');
+            menu.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+        
+        // ===== 显示/隐藏连接弹窗 =====
+        function showConnectModal() {
+            document.getElementById('connectModal').classList.add('show');
+        }
+        
+        function hideConnectModal() {
+            document.getElementById('connectModal').classList.remove('show');
+        }
+        
+        // ===== 格式化时间 =====
+        function formatLastSeen(lastSeen) {
+            if (!lastSeen) return '未知';
+            
+            const date = new Date(lastSeen);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000); // 秒数差
+            
+            if (diff < 60) return '刚刚';
+            if (diff < 3600) return `${Math.floor(diff / 60)}分钟前`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}小时前`;
+            return date.toLocaleDateString();
+        }
+        
+        // ===== 刷新服务器列表 =====
+        async function refreshServers() {
+            if (refreshLoading) return;
+            
+            refreshLoading = true;
+            const refreshBtn = document.getElementById('menuRefresh');
+            refreshBtn.classList.add('loading');
+            
+            await loadServers(true);
+            
+            refreshLoading = false;
+            refreshBtn.classList.remove('loading');
+        }
+        
+        // ===== 加载服务器列表 =====
+        async function loadServers(force = false) {
+            if (loading && !force) return;
+            
+            loading = true;
+            const grid = document.getElementById('serversGrid');
+            
+            try {
+                const res = await fetch('/servers', { 
+                    timeout: 3000,
+                    cache: force ? 'reload' : 'default' 
+                });
+                if (!res.ok) throw new Error('获取列表失败');
+                
+                servers = await res.json();
+                console.log('获取到服务器列表:', servers);
+                
+                // 计算在线数量
+                const onlineCount = servers.filter(s => s.is_online !== false).length;
+                document.getElementById('onlineCount').textContent = `${onlineCount} 在线`;
+                
+                if (servers.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <img src="icon/12.png" alt="暂无房间">
+                            </div>
+                            <p style="font-size: 18px; margin-bottom: 10px;">暂无可用房间</p>
+                            <p style="font-size: 14px; color: #72767d;">点击右上角"连接"按钮</p>
+                            <p style="font-size: 12px; color: #72767d; margin-top: 20px;">或等待其他服务器注册</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                grid.innerHTML = servers.map(s => {
+                    const isOnline = s.is_online !== false;
+                    const lastSeenText = formatLastSeen(s.last_seen);
+                    const statusClass = isOnline ? 'online' : 'offline';
+                    const statusText = isOnline ? '在线' : '离线';
+                    
+                    return `
+                        <div class="server-card ${statusClass}" onclick="connectFromCard('${s.ip}', ${s.port}, '${escapeHtml(s.name)}', ${s.http_port})">
+                            <div class="server-name">
+                                ${escapeHtml(s.name)}
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="server-description">${escapeHtml(s.description || '一个热闹的聊天室')}</div>
+                            <div class="server-meta">
+                                <div class="last-seen">${lastSeenText}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (e) {
+                console.error('加载服务器列表失败:', e);
+                grid.innerHTML = `
+                    <div class="empty-state" style="color: #f04747;">
+                        <div class="empty-icon">
+                            <img src="icon/12.png" alt="加载失败">
+                        </div>
+                        <p style="font-size: 18px; margin-bottom: 10px;">加载房间列表失败</p>
+                        <p style="font-size: 14px;">${e.message || '无法连接到大厅服务器'}</p>
+                        <button onclick="refreshServers()" style="margin-top: 20px; padding: 8px 16px; background:#5865f2; color:white; border:none; border-radius:20px; cursor:pointer;">
+                            重试
+                        </button>
+                    </div>
+                `;
+            } finally {
+                loading = false;
+            }
+        }
+        
+        // ===== HTML转义 =====
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+        
+        // ===== 初始化 =====
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserInfo();
+            loadServers();
+            
+            // 自动刷新改为30秒一次
+            setInterval(() => loadServers(), 30000);
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    hideConnectModal();
+                    if (document.getElementById('leftMenu').classList.contains('show')) {
+                        toggleMenu();
+                    }
+                }
+            });
+            
+            document.getElementById('connectModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideConnectModal();
+                }
+            });
+        });
+    </script>
+    
+    <!-- 统一心跳管理 -->
+    <script src="heartbeat.js"></script>
+</body>
+</html>

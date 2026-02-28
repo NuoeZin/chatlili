@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>文件预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #36393e;
+            color: #dcddde;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶栏 */
+        .header {
+            background: #2f3136;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid #202225;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            font-size: 24px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #40444b;
+            color: #fff;
+        }
+
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            word-break: break-all;
+            color: #fff;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-meta {
+            font-size: 12px;
+            color: #72767d;
+        }
+
+        .download-btn {
+            background: #5865f2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .download-btn:hover {
+            background: #4752c4;
+        }
+
+        /* 内容区域 */
+        .content {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px;
+            background-color: #36393e;
+        }
+
+        /* ===== 视频播放器样式 ===== */
+        .video-container {
+            width: 100%;
+            max-width: 900px;
+            background: #2f3136;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #40444b;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-wrapper {
+            background: #000;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* 视频控制栏 - 在视频下方 */
+        .video-controls {
+            background: #2f3136;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-top: 1px solid #40444b;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            font-size: 20px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .control-btn:hover {
+            background: #40444b;
+            color: #fff;
+        }
+
+        .control-btn.primary {
+            background: #5865f2;
+            color: white;
+        }
+
+        .control-btn.primary:hover {
+            background: #4752c4;
+        }
+
+        .video-progress {
+            flex: 1;
+            min-width: 200px;
+            height: 6px;
+            background: #40444b;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .video-progress-filled {
+            height: 100%;
+            background: #5865f2;
+            border-radius: 3px;
+            width: 0%;
+            position: relative;
+        }
+
+        .video-progress-filled::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -3px;
+            width: 12px;
+            height: 12px;
+            background: #5865f2;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .video-progress:hover .video-progress-filled::after {
+            opacity: 1;
+        }
+
+        .video-time {
+            color: #dcddde;
+            font-size: 14px;
+            font-family: monospace;
+            white-space: nowrap;
+        }
+
+        /* ===== 音频播放器样式 ===== */
+        .audio-container {
+            width: 100%;
+            max-width: 600px;
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .audio-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .audio-icon {
+            font-size: 48px;
+            color: #5865f2;
+            background: #40444b;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .audio-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .audio-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .audio-size {
+            font-size: 14px;
+            color: #72767d;
+        }
+
+        /* 音频控制栏 */
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .audio-progress {
+            flex: 1;
+            min-width: 200px;
+            height: 6px;
+            background: #40444b;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .audio-progress-filled {
+            height: 100%;
+            background: #5865f2;
+            border-radius: 3px;
+            width: 0%;
+            position: relative;
+        }
+
+        .audio-progress-filled::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -3px;
+            width: 12px;
+            height: 12px;
+            background: #5865f2;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .audio-progress:hover .audio-progress-filled::after {
+            opacity: 1;
+        }
+
+        .audio-time {
+            color: #dcddde;
+            font-size: 14px;
+            font-family: monospace;
+            white-space: nowrap;
+        }
+
+        /* 文本容器 */
+        .text-container {
+            width: 100%;
+            max-width: 800px;
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 0;
+        }
+
+        .text-content {
+            background: #36393e;
+            border: 1px solid #40444b;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #dcddde;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        /* 其他文件容器 */
+        .file-preview {
+            text-align: center;
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            margin-top: 0;
+        }
+
+        .file-big-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            color: #5865f2;
+        }
+
+        .file-preview .file-name {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .file-preview .file-size {
+            color: #72767d;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            color: #72767d;
+            padding: 40px;
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 12px;
+            margin-top: 0;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 2px solid #5865f2;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 错误提示 */
+        .error {
+            text-align: center;
+            color: #f04747;
+            padding: 40px;
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 12px;
+            margin-top: 0;
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2f3136;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #202225;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #40444b;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px;
+            }
+            
+            .file-name {
+                font-size: 14px;
+            }
+            
+            .content {
+                padding: 10px;
+            }
+            
+            .audio-container {
+                padding: 16px;
+            }
+            
+            .audio-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+            
+            .audio-title {
+                font-size: 16px;
+            }
+            
+            .audio-controls {
+                gap: 12px;
+            }
+            
+            .video-controls {
+                padding: 8px 12px;
+                gap: 8px;
+            }
+            
+            .video-progress {
+                min-width: 150px;
+            }
+            
+            .text-container {
+                padding: 20px;
+            }
+            
+            .file-preview {
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .video-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .video-progress {
+                order: 3;
+                width: 100%;
+                min-width: 100%;
+            }
+            
+            .video-time {
+                order: 2;
+            }
+            
+            .audio-progress {
+                min-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div class="file-info">
+            <div class="file-name" id="fileName">加载中...</div>
+            <div class="file-meta" id="fileMeta"></div>
+        </div>
+        <button class="download-btn" id="downloadBtn" onclick="downloadFile()">
+            下载
+        </button>
+    </div>
+
+    <div class="content" id="content">
+        <div class="loading">加载中...</div>
+    </div>
+
+    <script>
+        // 获取URL参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const serverIp = urlParams.get('ip');
+        const serverPort = urlParams.get('port');
+        const filename = urlParams.get('file');
+        const fileType = urlParams.get('type');
+
+        // 构建文件URL
+        const fileUrl = `http://${serverIp}:${serverPort}/file/${encodeURIComponent(filename)}`;
+
+        // 页面元素
+        const fileNameEl = document.getElementById('fileName');
+        const fileMetaEl = document.getElementById('fileMeta');
+        const contentEl = document.getElementById('content');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // 音频/视频元素和控制变量
+        let mediaElement = null;
+        let isPlaying = false;
+        let isMuted = false;
+
+        // 初始化
+        async function init() {
+            if (!serverIp || !serverPort || !filename) {
+                showError('参数错误');
+                return;
+            }
+
+            fileNameEl.textContent = filename;
+
+            // 获取文件信息
+            try {
+                const res = await fetch(fileUrl, { method: 'HEAD' });
+                const size = res.headers.get('content-length');
+                if (size) {
+                    fileMetaEl.textContent = formatFileSize(parseInt(size));
+                }
+
+                // 根据文件类型显示不同界面
+                if (fileType === 'video') {
+                    showVideo();
+                } else if (fileType === 'audio') {
+                    showAudio();
+                } else if (fileType === 'text' || filename.endsWith('.txt') || 
+                          filename.endsWith('.js') || filename.endsWith('.css') || 
+                          filename.endsWith('.html') || filename.endsWith('.json') ||
+                          filename.endsWith('.md') || filename.endsWith('.log')) {
+                    showText();
+                } else {
+                    showFile();
+                }
+            } catch (e) {
+                showError('加载失败');
+            }
+        }
+
+        // 显示视频
+        function showVideo() {
+            contentEl.innerHTML = `
+                <div class="video-container">
+                    <div class="video-wrapper">
+                        <video id="videoPlayer" src="${fileUrl}" preload="metadata"></video>
+                    </div>
+                    <div class="video-controls">
+                        <button class="control-btn primary" id="playPauseBtn" onclick="togglePlay()">▶</button>
+                        <button class="control-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+                        <div class="video-progress" id="progressBar" onclick="seek(event)">
+                            <div class="video-progress-filled" id="progressFilled"></div>
+                        </div>
+                        <span class="video-time" id="timeDisplay">0:00 / 0:00</span>
+                    </div>
+                </div>
+            `;
+            
+            mediaElement = document.getElementById('videoPlayer');
+            setupMediaListeners();
+        }
+
+        // 显示音频
+        function showAudio() {
+            contentEl.innerHTML = `
+                <div class="audio-container">
+                    <div class="audio-info">
+                        <div class="audio-icon">🎵</div>
+                        <div class="audio-details">
+                            <div class="audio-title">${escapeHtml(filename)}</div>
+                            <div class="audio-size">${fileMetaEl.textContent || '未知大小'}</div>
+                        </div>
+                    </div>
+                    <div class="audio-controls">
+                        <button class="control-btn primary" id="playPauseBtn" onclick="togglePlay()">▶</button>
+                        <button class="control-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+                        <div class="audio-progress" id="progressBar" onclick="seek(event)">
+                            <div class="audio-progress-filled" id="progressFilled"></div>
+                        </div>
+                        <span class="audio-time" id="timeDisplay">0:00 / 0:00</span>
+                    </div>
+                    <audio id="audioPlayer" src="${fileUrl}" preload="metadata" style="display: none;"></audio>
+                </div>
+            `;
+            
+            mediaElement = document.getElementById('audioPlayer');
+            setupMediaListeners();
+        }
+
+        // 设置媒体事件监听
+        function setupMediaListeners() {
+            if (!mediaElement) return;
+
+            mediaElement.addEventListener('timeupdate', updateProgress);
+            mediaElement.addEventListener('loadedmetadata', updateDuration);
+            mediaElement.addEventListener('play', () => {
+                isPlaying = true;
+                updatePlayButton();
+            });
+            mediaElement.addEventListener('pause', () => {
+                isPlaying = false;
+                updatePlayButton();
+            });
+            mediaElement.addEventListener('volumechange', updateMuteButton);
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            if (!mediaElement) return;
+            const progress = document.getElementById('progressFilled');
+            const timeDisplay = document.getElementById('timeDisplay');
+            if (!progress || !timeDisplay) return;
+
+            const percent = (mediaElement.currentTime / mediaElement.duration) * 100;
+            progress.style.width = percent + '%';
+
+            const current = formatTime(mediaElement.currentTime);
+            const duration = formatTime(mediaElement.duration);
+            timeDisplay.textContent = `${current} / ${duration}`;
+        }
+
+        // 更新时长显示
+        function updateDuration() {
+            if (!mediaElement) return;
+            const timeDisplay = document.getElementById('timeDisplay');
+            if (!timeDisplay) return;
+            
+            const duration = formatTime(mediaElement.duration);
+            const current = formatTime(mediaElement.currentTime);
+            timeDisplay.textContent = `${current} / ${duration}`;
+        }
+
+        // 格式化时间
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // 切换播放/暂停
+        function togglePlay() {
+            if (!mediaElement) return;
+            if (mediaElement.paused) {
+                mediaElement.play();
+            } else {
+                mediaElement.pause();
+            }
+        }
+
+        // 更新播放按钮
+        function updatePlayButton() {
+            const btn = document.getElementById('playPauseBtn');
+            if (!btn) return;
+            btn.textContent = isPlaying ? '⏸' : '▶';
+        }
+
+        // 切换静音
+        function toggleMute() {
+            if (!mediaElement) return;
+            mediaElement.muted = !mediaElement.muted;
+            isMuted = mediaElement.muted;
+            updateMuteButton();
+        }
+
+        // 更新静音按钮
+        function updateMuteButton() {
+            const btn = document.getElementById('muteBtn');
+            if (!btn) return;
+            btn.textContent = mediaElement.muted ? '🔇' : '🔊';
+        }
+
+        // 跳转进度
+        function seek(event) {
+            if (!mediaElement) return;
+            const progressBar = document.getElementById('progressBar');
+            if (!progressBar) return;
+
+            const rect = progressBar.getBoundingClientRect();
+            const pos = (event.clientX - rect.left) / rect.width;
+            mediaElement.currentTime = pos * mediaElement.duration;
+        }
+
+        // 显示文本
+        async function showText() {
+            contentEl.innerHTML = '<div class="loading">加载文本内容...</div>';
+            
+            try {
+                const res = await fetch(fileUrl);
+                const text = await res.text();
+                
+                contentEl.innerHTML = `
+                    <div class="text-container">
+                        <div class="text-content">${escapeHtml(text)}</div>
+                    </div>
+                `;
+            } catch (e) {
+                showError('文本加载失败');
+            }
+        }
+
+        // 显示其他文件
+        function showFile() {
+            contentEl.innerHTML = `
+                <div class="file-preview">
+                    <div class="file-big-icon">📎</div>
+                    <div class="file-name">${escapeHtml(filename)}</div>
+                    <div class="file-size">${fileMetaEl.textContent || '未知大小'}</div>
+                    <button class="download-btn" onclick="downloadFile()" style="margin-top: 20px;">
+                        下载文件
+                    </button>
+                </div>
+            `;
+        }
+
+        // 显示错误
+        function showError(msg) {
+            contentEl.innerHTML = `<div class="error">❌ ${msg}</div>`;
+        }
+
+        // 下载文件
+        function downloadFile() {
+            window.open(fileUrl, '_blank');
+        }
+
+        // 返回上一页
+        function goBack() {
+            history.back();
+        }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (!bytes) return '未知大小';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + units[i];
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // 启动
+        init();
+    </script>
+    <!-- 统一心跳管理 -->
+    <script src="heartbeat.js"></script>
+</body>
+</html>

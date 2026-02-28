@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>好友列表 - ChatLili</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #36393e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .friends-container {
+            max-width: 800px;
+            width: 95%;
+            margin: 20px auto;
+        }
+        
+        .friends-dialog {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        
+        .dialog-header {
+            background: #36393f;
+            padding: 16px 20px;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .dialog-title {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        /* 修复返回按钮样式 - 恢复圆形 */
+        .dialog-btn {
+            background: #40444b;
+            color: #b9bbbe;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .dialog-btn:hover {
+            background: #5865f2;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        /* 标签页 - 移除数字样式 */
+        .tabs {
+            display: flex;
+            gap: 2px;
+            background: #2f3136;
+            border-bottom: 1px solid #40444b;
+            padding: 0 4px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            color: #b9bbbe;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab:hover {
+            color: #fff;
+        }
+        
+        .tab.active {
+            color: #fff;
+            border-bottom-color: #5865f2;
+        }
+        
+        /* 移除tab-badge样式 */
+        
+        /* 搜索区域 */
+        .search-section {
+            padding: 20px;
+            border-bottom: 1px solid #40444b;
+            background: #2f3136;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #40444b;
+            border: 1px solid #202225;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .search-input:focus {
+            border-color: #5865f2;
+        }
+        
+        .search-btn {
+            padding: 0 20px;
+            background: #5865f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .search-btn:hover {
+            background: #4752c4;
+        }
+        
+        .search-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 搜索结果 */
+        .search-results {
+            margin-top: 15px;
+            background: #36393f;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .search-results.show {
+            display: block;
+        }
+        
+        .search-result-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #40444b;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .search-result-item:hover {
+            background: #40444b;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden; /* 确保圆形裁剪 */
+        }
+        
+        /* 文字头像 - 当没有图片时显示 */
+        .result-avatar.text-avatar {
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .online-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #2f3136;
+            z-index: 2;
+        }
+        
+        .online-dot.online {
+            background: #3ba55d;
+        }
+        
+        .online-dot.offline {
+            background: #72767d;
+        }
+        
+        .result-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .result-name-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+        }
+        
+        .result-name {
+            color: #fff;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        .result-status {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 12px;
+        }
+        
+        .result-status.online {
+            background: rgba(59, 165, 93, 0.2);
+            color: #3ba55d;
+        }
+        
+        .result-status.offline {
+            background: rgba(114, 118, 125, 0.2);
+            color: #72767d;
+        }
+        
+        .result-uid {
+            color: #72767d;
+            font-size: 12px;
+            font-family: monospace;
+        }
+        
+        .result-action {
+            padding: 6px 12px;
+            background: #5865f2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .result-action:hover {
+            background: #4752c4;
+        }
+        
+        .result-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .result-action.following {
+            background: #4f545c;
+        }
+        
+        .result-action.following:hover {
+            background: #5d6269;
+        }
+        
+        /* 列表区域 */
+        .list-section {
+            padding: 20px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #b9bbbe;
+            font-size: 12px;
+        }
+        
+        .list-count {
+            background: #40444b;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        
+        /* 通知横幅 */
+        .notification-banner {
+            background: #36393f;
+            border-left: 4px solid #5865f2;
+            padding: 12px 16px;
+            margin: 0 20px 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #5865f2;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .notification-text {
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        .notification-text small {
+            color: #b9bbbe;
+            font-size: 12px;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .notification-close:hover {
+            background: #40444b;
+            color: #fff;
+        }
+        
+        /* 卡片 */
+        .item-card {
+            background: #36393f;
+            border: 1px solid #40444b;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .item-card:hover {
+            border-color: #5865f2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .item-card.online {
+            border-left: 4px solid #3ba55d;
+        }
+        
+        .item-card.offline {
+            border-left: 4px solid #72767d;
+        }
+        
+        .item-main {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .item-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 22px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden; /* 确保圆形裁剪 */
+        }
+        
+        /* 文字头像 - 当没有图片时显示 */
+        .item-avatar.text-avatar {
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 22px;
+        }
+        
+        .item-avatar .online-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #36393f;
+            z-index: 2;
+        }
+        
+        .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .item-name-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        
+        .item-name {
+            color: #fff;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .item-status {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 12px;
+        }
+        
+        .item-status.online {
+            background: rgba(59, 165, 93, 0.2);
+            color: #3ba55d;
+        }
+        
+        .item-status.offline {
+            background: rgba(114, 118, 125, 0.2);
+            color: #72767d;
+        }
+        
+        .item-uid {
+            color: #00b0f4;
+            font-size: 12px;
+            font-family: monospace;
+        }
+        
+        .item-since {
+            color: #72767d;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        
+        /* 互动菜单 */
+        .item-actions {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #40444b;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .action-btn.primary {
+            background: #5865f2;
+            color: white;
+        }
+        
+        .action-btn.primary:hover {
+            background: #4752c4;
+        }
+        
+        .action-btn.danger {
+            background: #f04747;
+            color: white;
+        }
+        
+        .action-btn.danger:hover {
+            background: #d33f3f;
+        }
+        
+        .action-btn.secondary {
+            background: #4f545c;
+            color: white;
+        }
+        
+        .action-btn.secondary:hover {
+            background: #5d6269;
+        }
+        
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 速聊模态框 */
+        .quickchat-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .quickchat-modal.show {
+            display: flex;
+        }
+        
+        .quickchat-content {
+            background: #2f3136;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #40444b;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        
+        .quickchat-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .quickchat-title {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .quickchat-title .online-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .quickchat-close {
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            font-size: 24px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        .quickchat-close:hover {
+            background: #40444b;
+            color: #fff;
+        }
+        
+        .quickchat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            min-height: 300px;
+            max-height: 400px;
+        }
+        
+        .message-item {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .message-item.self {
+            justify-content: flex-end;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 14px;
+            word-break: break-word;
+            position: relative;
+        }
+        
+        .message-item.self .message-bubble {
+            background: #5865f2;
+            color: white;
+            border-top-right-radius: 4px;
+        }
+        
+        .message-item.other .message-bubble {
+            background: #40444b;
+            color: #dcddde;
+            border-top-left-radius: 4px;
+        }
+        
+        .message-time {
+            font-size: 10px;
+            color: #72767d;
+            margin-top: 4px;
+            text-align: right;
+        }
+        
+        .quickchat-input {
+            padding: 16px 20px;
+            border-top: 1px solid #40444b;
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* 修复输入框类型问题 */
+        .quickchat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #40444b;
+            border: 1px solid #202225;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            -webkit-text-security: none; /* 确保不是密码框 */
+            text-security: none;
+        }
+        
+        .quickchat-input input:focus {
+            border-color: #5865f2;
+        }
+        
+        .quickchat-input input::placeholder {
+            color: #72767d;
+        }
+        
+        .quickchat-input button {
+            padding: 0 20px;
+            background: #5865f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .quickchat-input button:hover {
+            background: #4752c4;
+        }
+        
+        .quickchat-input button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #72767d;
+            padding: 40px 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #72767d;
+            padding: 30px;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+            border: 2px solid #5865f2;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 速聊模态框 -->
+    <div id="quickchatModal" class="quickchat-modal">
+        <div class="quickchat-content">
+            <div class="quickchat-header">
+                <span class="quickchat-title" id="quickchatTitle">
+                    <span>速聊</span>
+                    <span class="online-dot" id="quickchatOnlineDot"></span>
+                </span>
+                <button class="quickchat-close" onclick="closeQuickChat()">&times;</button>
+            </div>
+            <div class="quickchat-messages" id="quickchatMessages"></div>
+            <div class="quickchat-input">
+                <input type="text" id="quickchatInput" placeholder="输入消息..." onkeypress="if(event.key==='Enter') sendQuickMessage()" autocomplete="off">
+                <button onclick="sendQuickMessage()" id="quickchatSendBtn">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="friends-container">
+        <div class="friends-dialog">
+            <div class="dialog-header">
+                <button class="dialog-btn" onclick="goBack()">←</button>
+                <span class="dialog-title">好友列表</span>
+                <div style="width: 40px;"></div> <!-- 保持对称 -->
+            </div>
+            
+            <!-- 通知区域 -->
+            <div id="notificationArea" style="display: none;"></div>
+            
+            <!-- 标签页 - 移除数字 -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('friends')">好友</div>
+                <div class="tab" onclick="switchTab('followers')">关注者</div>
+            </div>
+            
+            <!-- 搜索区域 -->
+            <div class="search-section">
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="搜索用户 (用户名或UID)" onkeypress="if(event.key==='Enter') searchUsers()" autocomplete="off">
+                    <button class="search-btn" onclick="searchUsers()" id="searchBtn">搜索</button>
+                </div>
+                
+                <!-- 搜索结果 -->
+                <div id="searchResults" class="search-results"></div>
+            </div>
+            
+            <!-- 列表区域 -->
+            <div class="list-section" id="listSection">
+                <div id="friendsList" style="display: block;">
+                    <div class="list-header">
+                        <span>我的好友</span>
+                        <span class="list-count" id="friendsCount">0</span>
+                    </div>
+                    <div id="friendsContainer"></div>
+                </div>
+                
+                <div id="followersList" style="display: none;">
+                    <div class="list-header">
+                        <span>关注我的人</span>
+                        <span class="list-count" id="followersCount">0</span>
+                    </div>
+                    <div id="followersContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const LOBBY_URL = window.location.origin;
+        let uid = null;
+        let username = null;
+        let friends = [];
+        let followers = [];
+        let currentChatId = null;
+        let currentChatFriend = null;
+        let chatPolling = null;
+        let currentTab = 'friends';
+        let notifications = [];
+        
+        // ===== Cookie 工具函数 =====
+        function getCookie(name) {
+            const cookieName = name + "=";
+            const cookies = document.cookie.split(';');
+            for(let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.indexOf(cookieName) === 0) {
+                    return cookie.substring(cookieName.length, cookie.length);
+                }
+            }
+            return "";
+        }
+        
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+        
+        // ===== 智能返回函数 =====
+        function goBack() {
+            const referrer = document.referrer;
+            
+            // 优先返回来源页面
+            if (referrer) {
+                window.location.href = referrer;
+            } 
+            // 如果有历史记录，返回上一页
+            else if (window.history.length > 1) {
+                window.history.back();
+            }
+            // 默认返回 index.html
+            else {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // ===== 获取当前用户信息 =====
+        function getCurrentUser() {
+            uid = localStorage.getItem('uid') || getCookie('uid');
+            username = localStorage.getItem('user') || getCookie('username');
+            
+            if (!uid || !username) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+        
+        // ===== 标签页切换 =====
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.list-section > div').forEach(l => l.style.display = 'none');
+            
+            if (tab === 'friends') {
+                document.querySelector('.tab').classList.add('active');
+                document.getElementById('friendsList').style.display = 'block';
+                loadFriends();
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('followersList').style.display = 'block';
+                loadFollowers();
+            }
+        }
+        
+        // ===== 显示通知 =====
+        function showNotification(user) {
+            const area = document.getElementById('notificationArea');
+            const notificationId = 'notify_' + Date.now();
+            
+            const html = `
+                <div id="${notificationId}" class="notification-banner">
+                    <div class="notification-content">
+                        <div class="notification-avatar" style="background-image: url('${LOBBY_URL}/api/avatar/${user.uid}')"></div>
+                        <div class="notification-text">
+                            <strong>${escapeHtml(user.username)}</strong> 关注了你
+                            <br><small>UID: ${user.uid}</small>
+                        </div>
+                    </div>
+                    <button class="notification-close" onclick="document.getElementById('${notificationId}').remove()">×</button>
+                </div>
+            `;
+            
+            area.innerHTML = html + area.innerHTML;
+            area.style.display = 'block';
+            
+            // 5秒后自动消失
+            setTimeout(() => {
+                const el = document.getElementById(notificationId);
+                if (el) el.remove();
+                if (area.children.length === 0) {
+                    area.style.display = 'none';
+                }
+            }, 5000);
+        }
+        
+        // ===== 搜索用户 =====
+        async function searchUsers() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query || query.length < 2) {
+                alert('搜索关键词至少2个字符');
+                return;
+            }
+            
+            if (!getCurrentUser()) return;
+            
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            document.getElementById('searchBtn').disabled = true;
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/search`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        uid: uid,
+                        query: query,
+                        session_token: token
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    displaySearchResults(data.results || []);
+                } else {
+                    alert(data.error || '搜索失败');
+                }
+            } catch (e) {
+                console.error('搜索失败:', e);
+                alert('搜索失败，请检查网络');
+            } finally {
+                document.getElementById('searchBtn').disabled = false;
+            }
+        }
+        
+        // ===== 显示搜索结果 =====
+        function displaySearchResults(results) {
+            const container = document.getElementById('searchResults');
+            
+            if (results.length === 0) {
+                container.innerHTML = '<div class="search-result-item" style="justify-content: center; color: #72767d;">未找到匹配的用户</div>';
+                container.classList.add('show');
+                return;
+            }
+            
+            let html = '';
+            results.forEach(user => {
+                const onlineClass = user.is_online ? 'online' : 'offline';
+                const onlineText = user.is_online ? '在线' : '离线';
+                
+                let actionButton = '';
+                if (user.is_friend) {
+                    actionButton = '<button class="result-action" disabled>已是好友</button>';
+                } else if (user.is_following) {
+                    actionButton = `<button class="result-action following" onclick="unfollowUser('${user.uid}', this)">已关注</button>`;
+                } else {
+                    actionButton = `<button class="result-action" onclick="followUser('${user.uid}', this)">关注</button>`;
+                }
+                
+                html += `
+                    <div class="search-result-item">
+                        <div class="result-avatar" id="avatar-${user.uid}" style="background-image: url('${LOBBY_URL}/api/avatar/${user.uid}')">
+                            <span class="online-dot ${onlineClass}"></span>
+                        </div>
+                        <div class="result-info">
+                            <div class="result-name-row">
+                                <span class="result-name">${escapeHtml(user.username)}</span>
+                                <span class="result-status ${onlineClass}">${onlineText}</span>
+                            </div>
+                            <div class="result-uid">UID: ${user.uid}</div>
+                        </div>
+                        ${actionButton}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            container.classList.add('show');
+            
+            // 处理头像加载失败的情况
+            results.forEach(user => {
+                const avatarEl = document.getElementById(`avatar-${user.uid}`);
+                if (avatarEl) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // 图片加载成功，保持背景图片
+                    };
+                    img.onerror = function() {
+                        // 图片加载失败，显示文字头像
+                        avatarEl.style.backgroundImage = 'none';
+                        avatarEl.classList.add('text-avatar');
+                        avatarEl.textContent = user.username.charAt(0).toUpperCase();
+                    };
+                    img.src = `${LOBBY_URL}/api/avatar/${user.uid}`;
+                }
+            });
+        }
+        
+        // ===== 关注用户 =====
+        async function followUser(followedUid, btn) {
+            if (!getCurrentUser()) return;
+            
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            btn.disabled = true;
+            btn.textContent = '关注中...';
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/follow`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        uid: uid,
+                        followed_uid: followedUid,
+                        session_token: token
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    btn.className = 'result-action following';
+                    btn.textContent = '已关注';
+                    
+                    // 如果对方也关注了我，会自动成为好友
+                    loadFriends();
+                    loadFollowers();
+                } else {
+                    alert(data.error || '关注失败');
+                    btn.disabled = false;
+                    btn.textContent = '关注';
+                }
+            } catch (e) {
+                console.error('关注失败:', e);
+                alert('关注失败，请检查网络');
+                btn.disabled = false;
+                btn.textContent = '关注';
+            }
+        }
+        
+        // ===== 取消关注 =====
+        async function unfollowUser(followedUid, btn) {
+            if (!getCurrentUser()) return;
+            
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            btn.disabled = true;
+            btn.textContent = '取消中...';
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/unfollow`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        uid: uid,
+                        followed_uid: followedUid,
+                        session_token: token
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    btn.className = 'result-action';
+                    btn.textContent = '关注';
+                    btn.disabled = false;
+                    
+                    // 刷新列表
+                    loadFriends();
+                    loadFollowers();
+                    
+                    // 重新搜索当前结果
+                    searchUsers();
+                } else {
+                    alert(data.error || '取消关注失败');
+                    btn.disabled = false;
+                    btn.textContent = '已关注';
+                }
+            } catch (e) {
+                console.error('取消关注失败:', e);
+                alert('取消关注失败，请检查网络');
+                btn.disabled = false;
+                btn.textContent = '已关注';
+            }
+        }
+        
+        // ===== 加载好友列表 =====
+        async function loadFriends() {
+            if (!getCurrentUser()) return;
+            
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/list`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        uid: uid,
+                        session_token: token
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    friends = data.friends || [];
+                    displayFriends();
+                }
+            } catch (e) {
+                console.error('加载好友列表失败:', e);
+                document.getElementById('friendsContainer').innerHTML = '<div class="empty-state">加载失败</div>';
+            }
+        }
+        
+        // ===== 显示好友列表 =====
+        function displayFriends() {
+            const container = document.getElementById('friendsContainer');
+            const countEl = document.getElementById('friendsCount');
+            
+            countEl.textContent = friends.length;
+            
+            if (friends.length === 0) {
+                container.innerHTML = '<div class="empty-state">还没有好友，快去添加吧</div>';
+                return;
+            }
+            
+            let html = '';
+            friends.forEach(friend => {
+                // 确保 is_online 是布尔值
+                const isOnline = friend.is_online === true;
+                const onlineClass = isOnline ? 'online' : 'offline';
+                const onlineText = isOnline ? '在线' : '离线';
+                const friendSince = new Date(friend.friend_since * 1000).toLocaleDateString();
+                
+                console.log(`好友 ${friend.username} (${friend.uid}) 在线状态: ${isOnline}`);
+                
+                html += `
+                    <div class="item-card ${onlineClass}" data-uid="${friend.uid}" onclick="toggleItemActions(this)">
+                        <div class="item-main">
+                            <div class="item-avatar" id="friend-avatar-${friend.uid}" style="background-image: url('${LOBBY_URL}/api/avatar/${friend.uid}')">
+                                <span class="online-dot ${onlineClass}"></span>
+                            </div>
+                            <div class="item-info">
+                                <div class="item-name-row">
+                                    <span class="item-name">${escapeHtml(friend.username)}</span>
+                                    <span class="item-status ${onlineClass}">${onlineText}</span>
+                                </div>
+                                <div class="item-uid">UID: ${friend.uid}</div>
+                                <div class="item-since">好友始于 ${friendSince}</div>
+                            </div>
+                        </div>
+                        <div class="item-actions" style="display: none;">
+                            <button class="action-btn primary" onclick="event.stopPropagation(); startQuickChat('${friend.uid}', '${escapeHtml(friend.username)}', ${isOnline})">
+                                💬 速聊
+                            </button>
+                            <button class="action-btn secondary" onclick="event.stopPropagation(); goToUserProfile('${friend.uid}', '${escapeHtml(friend.username)}')">
+                                👤 他的主页
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            // 处理头像加载失败的情况
+            friends.forEach(friend => {
+                const avatarEl = document.getElementById(`friend-avatar-${friend.uid}`);
+                if (avatarEl) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // 图片加载成功，保持背景图片
+                    };
+                    img.onerror = function() {
+                        // 图片加载失败，显示文字头像
+                        avatarEl.style.backgroundImage = 'none';
+                        avatarEl.classList.add('text-avatar');
+                        avatarEl.textContent = friend.username.charAt(0).toUpperCase();
+                        // 重新添加在线状态点
+                        const dot = document.createElement('span');
+                        dot.className = `online-dot ${friend.is_online ? 'online' : 'offline'}`;
+                        avatarEl.appendChild(dot);
+                    };
+                    img.src = `${LOBBY_URL}/api/avatar/${friend.uid}`;
+                }
+            });
+        }
+        
+        // ===== 加载关注者列表 =====
+        async function loadFollowers() {
+            if (!getCurrentUser()) return;
+            
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/followers`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        uid: uid,
+                        session_token: token
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    const newFollowers = data.followers || [];
+                    
+                    // 检查新关注者
+                    if (followers.length > 0) {
+                        const oldIds = new Set(followers.map(f => f.uid));
+                        const newOnes = newFollowers.filter(f => !oldIds.has(f.uid));
+                        newOnes.forEach(f => showNotification(f));
+                    }
+                    
+                    followers = newFollowers;
+                    displayFollowers();
+                }
+            } catch (e) {
+                console.error('加载关注者列表失败:', e);
+                document.getElementById('followersContainer').innerHTML = '<div class="empty-state">加载失败</div>';
+            }
+        }
+        
+        // ===== 显示关注者列表 =====
+        function displayFollowers() {
+            const container = document.getElementById('followersContainer');
+            const countEl = document.getElementById('followersCount');
+            
+            countEl.textContent = followers.length;
+            
+            if (followers.length === 0) {
+                container.innerHTML = '<div class="empty-state">还没有人关注你</div>';
+                return;
+            }
+            
+            let html = '';
+            followers.forEach(follower => {
+                // 确保 is_online 是布尔值
+                const isOnline = follower.is_online === true;
+                const onlineClass = isOnline ? 'online' : 'offline';
+                const onlineText = isOnline ? '在线' : '离线';
+                const since = new Date(follower.followed_since * 1000).toLocaleDateString();
+                
+                console.log(`关注者 ${follower.username} (${follower.uid}) 在线状态: ${isOnline}`);
+                
+                html += `
+                    <div class="item-card ${onlineClass}" data-uid="${follower.uid}" onclick="toggleItemActions(this)">
+                        <div class="item-main">
+                            <div class="item-avatar" id="follower-avatar-${follower.uid}" style="background-image: url('${LOBBY_URL}/api/avatar/${follower.uid}')">
+                                <span class="online-dot ${onlineClass}"></span>
+                            </div>
+                            <div class="item-info">
+                                <div class="item-name-row">
+                                    <span class="item-name">${escapeHtml(follower.username)}</span>
+                                    <span class="item-status ${onlineClass}">${onlineText}</span>
+                                </div>
+                                <div class="item-uid">UID: ${follower.uid}</div>
+                                <div class="item-since">关注于 ${since}</div>
+                            </div>
+                        </div>
+                        <div class="item-actions" style="display: none;">
+                            <button class="action-btn primary" onclick="event.stopPropagation(); followUser('${follower.uid}', this)">
+                                👥 互关
+                            </button>
+                            <button class="action-btn secondary" onclick="event.stopPropagation(); goToUserProfile('${follower.uid}', '${escapeHtml(follower.username)}')">
+                                👤 他的主页
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            // 处理头像加载失败的情况
+            followers.forEach(follower => {
+                const avatarEl = document.getElementById(`follower-avatar-${follower.uid}`);
+                if (avatarEl) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // 图片加载成功，保持背景图片
+                    };
+                    img.onerror = function() {
+                        // 图片加载失败，显示文字头像
+                        avatarEl.style.backgroundImage = 'none';
+                        avatarEl.classList.add('text-avatar');
+                        avatarEl.textContent = follower.username.charAt(0).toUpperCase();
+                        // 重新添加在线状态点
+                        const dot = document.createElement('span');
+                        dot.className = `online-dot ${follower.is_online ? 'online' : 'offline'}`;
+                        avatarEl.appendChild(dot);
+                    };
+                    img.src = `${LOBBY_URL}/api/avatar/${follower.uid}`;
+                }
+            });
+        }
+        
+        // ===== 切换卡片菜单 =====
+        function toggleItemActions(card) {
+            const actions = card.querySelector('.item-actions');
+            const isVisible = actions.style.display === 'flex';
+            
+            // 先隐藏所有菜单
+            document.querySelectorAll('.item-actions').forEach(a => a.style.display = 'none');
+            
+            // 显示当前菜单
+            if (!isVisible) {
+                actions.style.display = 'flex';
+            }
+        }
+        
+        // ===== 跳转到用户主页 =====
+        function goToUserProfile(targetUid, targetUsername) {
+            const platform = detectPlatform();
+            if (platform === 'mobile') {
+                window.location.href = `user-profile.html?uid=${targetUid}&username=${encodeURIComponent(targetUsername)}`;
+            } else {
+                window.location.href = `pc-user-profile.html?uid=${targetUid}&username=${encodeURIComponent(targetUsername)}`;
+            }
+        }
+        
+        // ===== 平台检测 =====
+        function detectPlatform() {
+            const ua = navigator.userAgent.toLowerCase();
+            return /mobile|android|iphone|ipad|phone/i.test(ua) ? 'mobile' : 'pc';
+        }
+        
+        // ===== 开始速聊 =====
+        async function startQuickChat(friendUid, friendName, isOnline) {
+            if (!getCurrentUser()) return;
+            
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/quickchat`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        from_uid: uid,
+                        to_uid: friendUid,
+                        session_token: token
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    currentChatId = data.chat_id;
+                    currentChatFriend = {
+                        uid: friendUid,
+                        username: friendName,
+                        is_online: isOnline
+                    };
+                    
+                    document.getElementById('quickchatTitle').innerHTML = `
+                        <span>与 ${friendName} 速聊</span>
+                        <span class="online-dot ${isOnline ? 'online' : 'offline'}" style="width: 8px; height: 8px;"></span>
+                    `;
+                    document.getElementById('quickchatMessages').innerHTML = '';
+                    document.getElementById('quickchatInput').value = '';
+                    document.getElementById('quickchatModal').classList.add('show');
+                    
+                    // 开始轮询消息
+                    startChatPolling();
+                } else {
+                    alert(data.error || '创建会话失败');
+                }
+            } catch (e) {
+                console.error('创建速聊失败:', e);
+                alert('创建失败，请检查网络');
+            }
+        }
+        
+        // ===== 开始轮询消息 =====
+        function startChatPolling() {
+            if (chatPolling) clearInterval(chatPolling);
+            
+            loadChatMessages(); // 立即加载一次
+            
+            chatPolling = setInterval(() => {
+                loadChatMessages();
+            }, 3000); // 每3秒轮询
+        }
+        
+        // ===== 加载聊天消息 =====
+        async function loadChatMessages() {
+            if (!currentChatId) return;
+            
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/quickchat/${currentChatId}?uid=${uid}&token=${token}`, {
+                    credentials: 'include'
+                });
+                
+                if (res.status === 404) {
+                    // 会话已过期
+                    alert('会话已过期');
+                    closeQuickChat();
+                    return;
+                }
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    displayChatMessages(data.messages || []);
+                }
+            } catch (e) {
+                console.error('加载消息失败:', e);
+            }
+        }
+        
+        // ===== 显示聊天消息 =====
+        function displayChatMessages(messages) {
+            const container = document.getElementById('quickchatMessages');
+            
+            let html = '';
+            messages.forEach(msg => {
+                const isSelf = msg.from_uid === uid;
+                const time = new Date(msg.timestamp * 1000).toLocaleTimeString();
+                
+                html += `
+                    <div class="message-item ${isSelf ? 'self' : 'other'}">
+                        <div class="message-bubble">
+                            ${escapeHtml(msg.content)}
+                            <div class="message-time">${time}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // ===== 发送速聊消息 =====
+        async function sendQuickMessage() {
+            const input = document.getElementById('quickchatInput');
+            const content = input.value.trim();
+            const sendBtn = document.getElementById('quickchatSendBtn');
+            
+            if (!content || !currentChatId) return;
+            
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            input.disabled = true;
+            sendBtn.disabled = true;
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/quickchat/${currentChatId}/send`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        from_uid: uid,
+                        content: content,
+                        session_token: token
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    input.value = '';
+                    await loadChatMessages(); // 立即加载新消息
+                } else {
+                    alert(data.error || '发送失败');
+                }
+            } catch (e) {
+                console.error('发送消息失败:', e);
+                alert('发送失败，请检查网络');
+            } finally {
+                input.disabled = false;
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+        
+        // ===== 关闭速聊 =====
+        function closeQuickChat() {
+            document.getElementById('quickchatModal').classList.remove('show');
+            if (chatPolling) {
+                clearInterval(chatPolling);
+                chatPolling = null;
+            }
+            currentChatId = null;
+        }
+        
+        // ===== HTML转义 =====
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+        
+        // ===== 点击外部关闭搜索结果 =====
+        document.addEventListener('click', function(e) {
+            const searchResults = document.getElementById('searchResults');
+            const searchInput = document.getElementById('searchInput');
+            
+            if (!searchResults.contains(e.target) && !searchInput.contains(e.target)) {
+                searchResults.classList.remove('show');
+            }
+        });
+        
+        // ===== 定期刷新在线状态 =====
+        setInterval(() => {
+            if (currentTab === 'friends') {
+                loadFriends();
+            } else {
+                loadFollowers();
+            }
+        }, 30000); // 30秒刷新一次
+        
+        // ===== 初始化 =====
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!getCurrentUser()) return;
+            loadFriends();
+            loadFollowers();
+            
+            // 心跳由 heartbeat.js 自动管理，无需手动启动
+        });
+    </script>
+    
+    <!-- 统一心跳管理 -->
+    <script src="heartbeat.js"></script>
+</body>
+</html>

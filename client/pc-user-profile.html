@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>他的主页 - ChatLili</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #36393e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .profile-container {
+            max-width: 1000px;
+            width: 95%;
+            margin: 30px auto;
+        }
+        
+        .profile-dialog {
+            background: #2f3136;
+            border: 1px solid #40444b;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        
+        .dialog-header {
+            background: #36393f;
+            padding: 20px 30px;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .dialog-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .dialog-btn {
+            background: #40444b;
+            color: #b9bbbe;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+        
+        .dialog-btn:hover {
+            background: #5865f2;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        /* 背景图片区域 */
+        .profile-background {
+            aspect-ratio: 16/9;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            border-bottom: 1px solid #40444b;
+            background-color: #2f3136;
+        }
+        
+        .profile-background::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(transparent, #2f3136);
+            pointer-events: none;
+        }
+        
+        /* PC端布局 - 左右分栏 */
+        .profile-main {
+            display: flex;
+            min-height: 550px;
+        }
+        
+        /* 左侧 - 用户卡片 */
+        .profile-left {
+            width: 320px;
+            background: #2f3136;
+            border-right: 1px solid #40444b;
+            padding: 20px 20px 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .profile-avatar-wrapper {
+            margin-top: -40px;
+            margin-bottom: 20px;
+            z-index: 20;
+        }
+        
+        .profile-avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 56px;
+            background-size: cover;
+            background-position: center;
+            border: 4px solid #2f3136;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .profile-name {
+            color: #fff;
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+        
+        .profile-uid {
+            color: #00b0f4;
+            font-size: 14px;
+            font-family: monospace;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .profile-stats {
+            width: 100%;
+            margin-top: 20px;
+            border-top: 1px solid #40444b;
+            padding-top: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #40444b;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #b9bbbe;
+            font-size: 15px;
+        }
+        
+        .stat-value {
+            color: #fff;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        /* 右侧 - 详细信息 */
+        .profile-right {
+            flex: 1;
+            background: #36393f;
+            padding: 35px;
+        }
+        
+        .section-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #5865f2;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+        
+        .info-card {
+            background: #2f3136;
+            border-radius: 12px;
+            padding: 22px;
+        }
+        
+        .info-label {
+            color: #b9bbbe;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .info-value {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .signature-box {
+            background: #2f3136;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 35px;
+        }
+        
+        .signature-label {
+            color: #b9bbbe;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        
+        .signature-text {
+            color: #fff;
+            font-size: 16px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #5865f2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #4752c4;
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-danger {
+            background: #f04747;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d33f3f;
+        }
+        
+        .btn-danger:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 服务器状态 */
+        .server-status {
+            background: #40444b;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #b9bbbe;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-dot.online {
+            background: #3ba55d;
+        }
+        
+        .status-dot.offline {
+            background: #f04747;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-main {
+                flex-direction: column;
+            }
+            
+            .profile-left {
+                width: auto;
+                border-right: none;
+                border-bottom: 1px solid #40444b;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-dialog">
+            <div class="dialog-header">
+                <button class="dialog-btn" onclick="goBack()">←</button>
+                <span class="dialog-title">他的主页</span>
+                <div style="width: 40px;"></div>
+            </div>
+            
+            <!-- 背景图片区域 -->
+            <div id="profileBackground" class="profile-background"></div>
+            
+            <div class="profile-main">
+                <!-- 左侧 - 用户卡片 -->
+                <div class="profile-left">
+                    <div class="profile-avatar-wrapper">
+                        <div id="profileAvatar" class="profile-avatar">?</div>
+                    </div>
+                    <div class="profile-name" id="profileName">加载中...</div>
+                    <div class="profile-uid" id="profileUid">UID: 加载中...</div>
+                    
+                    <!-- 服务器状态 -->
+                    <div class="server-status" id="serverStatus">
+                        <span class="status-dot" id="statusDot"></span>
+                        <span id="statusText">检查状态...</span>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">好友数量</span>
+                            <span class="stat-value" id="statFriends">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">追随者</span>
+                            <span class="stat-value" id="statFollowers">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧 - 详细信息 -->
+                <div class="profile-right">
+                    <div class="section-title">基本信息</div>
+                    
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-label">注册邮箱</div>
+                            <div class="info-value" id="detailEmail">未设置</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">注册时间</div>
+                            <div class="info-value" id="detailDate">未知</div>
+                        </div>
+                    </div>
+                    
+                    <div class="signature-box">
+                        <div class="signature-label">个人签名</div>
+                        <div class="signature-text" id="profileSignature">这个人很懒，还没有填写签名</div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn btn-primary" id="followBtn" onclick="toggleFollow()">
+                            关注
+                        </button>
+                        <button class="action-btn btn-danger" id="deleteBtn" style="display: none;" onclick="deleteFriend()">
+                            ✕ 删除好友
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const LOBBY_URL = window.location.origin;
+        let targetUid = null;
+        let targetUsername = null;
+        let currentUid = null;
+        let isFollowing = false;
+        let isFriend = false;
+        
+        function getCookie(name) {
+            const cookieName = name + "=";
+            const cookies = document.cookie.split(';');
+            for(let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.indexOf(cookieName) === 0) {
+                    return cookie.substring(cookieName.length, cookie.length);
+                }
+            }
+            return "";
+        }
+        
+        function getUrlParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        function goBack() {
+            window.location.href = 'friends.html';
+        }
+        
+        async function checkFollowStatus() {
+            currentUid = localStorage.getItem('uid') || getCookie('uid');
+            if (!currentUid) return;
+            
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/search`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        uid: currentUid,
+                        query: targetUid,
+                        session_token: token
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                if (res.ok && data.results && data.results.length > 0) {
+                    const user = data.results[0];
+                    isFollowing = user.is_following || false;
+                    isFriend = user.is_friend || false;
+                    
+                    const followBtn = document.getElementById('followBtn');
+                    const deleteBtn = document.getElementById('deleteBtn');
+                    
+                    if (isFriend) {
+                        followBtn.textContent = '已是好友';
+                        followBtn.disabled = true;
+                        deleteBtn.style.display = 'block';
+                    } else if (isFollowing) {
+                        followBtn.textContent = '已关注';
+                        followBtn.onclick = () => unfollow();
+                        followBtn.disabled = false;
+                        deleteBtn.style.display = 'none';
+                    } else {
+                        followBtn.textContent = '关注';
+                        followBtn.onclick = () => follow();
+                        followBtn.disabled = false;
+                        deleteBtn.style.display = 'none';
+                    }
+                }
+            } catch (e) {
+                console.error('检查关注状态失败:', e);
+            }
+        }
+        
+        async function follow() {
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            const btn = document.getElementById('followBtn');
+            
+            btn.disabled = true;
+            btn.textContent = '关注中...';
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/follow`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        uid: currentUid,
+                        followed_uid: targetUid,
+                        session_token: token
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    btn.textContent = '已关注';
+                    btn.onclick = () => unfollow();
+                    btn.disabled = false;
+                } else {
+                    alert(data.error || '关注失败');
+                    btn.textContent = '关注';
+                    btn.onclick = () => follow();
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                console.error('关注失败:', e);
+                alert('关注失败，请检查网络');
+                btn.textContent = '关注';
+                btn.onclick = () => follow();
+                btn.disabled = false;
+            }
+        }
+        
+        async function unfollow() {
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            const btn = document.getElementById('followBtn');
+            
+            btn.disabled = true;
+            btn.textContent = '取消中...';
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/unfollow`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        uid: currentUid,
+                        followed_uid: targetUid,
+                        session_token: token
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    btn.textContent = '关注';
+                    btn.onclick = () => follow();
+                    btn.disabled = false;
+                } else {
+                    alert(data.error || '取消关注失败');
+                    btn.textContent = '已关注';
+                    btn.onclick = () => unfollow();
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                console.error('取消关注失败:', e);
+                alert('取消关注失败，请检查网络');
+                btn.textContent = '已关注';
+                btn.onclick = () => unfollow();
+                btn.disabled = false;
+            }
+        }
+        
+        async function deleteFriend() {
+            if (!confirm(`确定要删除好友 ${targetUsername} 吗？`)) return;
+            
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            const deleteBtn = document.getElementById('deleteBtn');
+            
+            deleteBtn.disabled = true;
+            deleteBtn.textContent = '删除中...';
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/unfollow`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        uid: currentUid,
+                        followed_uid: targetUid,
+                        session_token: token
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert('好友已删除');
+                    window.location.href = 'friends.html';
+                } else {
+                    alert(data.error || '删除失败');
+                    deleteBtn.disabled = false;
+                    deleteBtn.textContent = '删除好友';
+                }
+            } catch (e) {
+                console.error('删除好友失败:', e);
+                alert('删除失败，请检查网络');
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = '删除好友';
+            }
+        }
+        
+        // ===== 获取好友数量和追随者数量（使用当前用户的token）=====
+        async function loadStats() {
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/count/${targetUid}?token=${token}`, {
+                    credentials: 'include'
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('statFriends').textContent = data.friends || 0;
+                    document.getElementById('statFollowers').textContent = data.followers || 0;
+                }
+            } catch (e) {
+                console.error('获取统计数据失败:', e);
+            }
+        }
+        
+        // ===== 检查在线状态（使用当前用户的token）=====
+        async function checkOnlineStatus() {
+            const token = getCookie('session_token') || localStorage.getItem('session_token');
+            
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/friends/heartbeat/status/${targetUid}?token=${token}`, {
+                    credentials: 'include'
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const statusDot = document.getElementById('statusDot');
+                    const statusText = document.getElementById('statusText');
+                    
+                    if (data.is_online) {
+                        statusDot.className = 'status-dot online';
+                        statusText.textContent = '在线';
+                    } else {
+                        statusDot.className = 'status-dot offline';
+                        statusText.textContent = '离线';
+                    }
+                }
+            } catch (e) {
+                console.error('获取在线状态失败:', e);
+            }
+        }
+        
+        async function loadUserInfo() {
+            targetUid = getUrlParam('uid');
+            targetUsername = getUrlParam('username');
+            
+            if (!targetUid || !targetUsername) {
+                alert('参数错误');
+                window.location.href = 'friends.html';
+                return;
+            }
+            
+            document.getElementById('profileName').textContent = targetUsername;
+            document.getElementById('profileUid').textContent = `UID: ${targetUid}`;
+            
+            // 加载头像
+            const avatarContainer = document.getElementById('profileAvatar');
+            const avatarUrl = `${LOBBY_URL}/api/avatar/${targetUid}?t=${Date.now()}`;
+            
+            const img = new Image();
+            img.onload = function() {
+                avatarContainer.style.backgroundImage = `url(${avatarUrl})`;
+                avatarContainer.style.backgroundSize = 'cover';
+                avatarContainer.style.backgroundPosition = 'center';
+                avatarContainer.textContent = '';
+            };
+            img.onerror = function() {
+                avatarContainer.textContent = targetUsername.charAt(0).toUpperCase();
+            };
+            img.src = avatarUrl;
+            
+            // 加载背景图片
+            const backgroundUrl = `${LOBBY_URL}/api/background/${targetUid}?t=${Date.now()}`;
+            fetch(backgroundUrl)
+                .then(res => {
+                    if (res.ok) {
+                        return res.blob();
+                    }
+                    throw new Error('背景加载失败');
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    document.getElementById('profileBackground').style.backgroundImage = `url(${url})`;
+                })
+                .catch(() => {});
+            
+            // 加载签名
+            const savedSig = localStorage.getItem(`sig_${targetUid}`);
+            if (savedSig) {
+                document.getElementById('profileSignature').textContent = savedSig;
+            }
+            
+            // 从大厅获取用户详细信息
+            try {
+                const res = await fetch(`${LOBBY_URL}/api/user/${targetUid}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    const email = data.email || '未设置';
+                    document.getElementById('detailEmail').textContent = email;
+                    
+                    if (data.created_at) {
+                        const date = new Date(data.created_at * 1000);
+                        document.getElementById('detailDate').textContent = date.toLocaleDateString('zh-CN');
+                    }
+                }
+            } catch (e) {
+                console.error('获取用户详情失败:', e);
+            }
+            
+            // 检查在线状态
+            await checkOnlineStatus();
+            
+            // 加载统计数据
+            await loadStats();
+            
+            // 检查关注状态
+            await checkFollowStatus();
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadUserInfo);
+    </script>
+    <!-- 统一心跳管理 -->
+    <script src="heartbeat.js"></script>
+</body>
+</html>
