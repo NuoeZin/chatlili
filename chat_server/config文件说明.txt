@@ -1,0 +1,25 @@
+    "server_name": "我的聊天室",房间名称
+    
+    "description": "一个普通的聊天室",房间简介
+    
+    "ws_port": 8765,通讯端口，无需改动
+    
+    "http_port": 5000,HTTP开放端口，无需改动
+    
+    "lobby_url": "http://localhost:8000/register",lobby（大厅）服务器地址
+    
+    "server_id": "auto",（默认无需改动）
+    
+    "secret_key": "auto",（默认无需改动）
+    
+    "public_ip": "",公网IP（当你的服务器是公网机器时）
+    
+    "auto_open_browser": false,自动打开服务器（你都放服务器了，还要机器自动打开浏览器干啥）
+    
+    "debug_mode": false,调试模式（默认关闭，不用开）
+    
+    "auth_mode": "lobby",用户数据从大厅获取（不用改，只有这个途径，本地用户注册功能都砍掉了）
+    
+    "room_password":房间密码。默认留空（沒设密码）
+    
+    "owner_uid":房主UID

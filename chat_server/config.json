@@ -1,0 +1,15 @@
+{
+    "server_name": "常驻池",
+    "description": "24h在线|服务器不炸就不下线",
+    "ws_port": 8765,
+    "http_port": 5000,
+    "lobby_url": "http://localhost:8000/register",
+    "server_id": "auto",
+    "secret_key": "auto",
+    "public_ip": "",
+    "auto_open_browser": false,
+    "debug_mode": false,
+    "auth_mode": "lobby",
+    "room_password": "",
+    "owner_uid": "11915025"
+}
