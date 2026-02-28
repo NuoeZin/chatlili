@@ -2,3 +2,101 @@
 Python网页简易chat服务器分布模式大厅注册聊天厅服务包
 
 bug闷多，懒得再改了
+
+项目简介
+chatlili 是一个基于Python的简易分布式聊天系统服务包。它实现了"大厅-房间"模式的分布式聊天架构，支持多服务器注册、动态房间管理以及实时消息广播。
+
+核心特性
+🏢 分布式架构：支持多个聊天服务器注册到中心大厅
+
+🏠 动态房间管理：用户可创建、加入、离开聊天房间
+
+🔄 实时消息广播：房间内消息实时推送给所有成员
+
+📡 跨服务器通信：不同服务器上的用户可以加入同一房间
+
+🚪 优雅退出机制：支持用户主动断开连接
+
+快速开始
+安装依赖
+bash
+pip install flask flask-socketio requests
+启动大厅服务
+bash
+python hall.py
+大厅服务默认运行在 http://localhost:5000
+
+启动聊天服务器
+bash
+python server.py
+聊天服务器默认运行在 http://localhost:5001
+
+客户端连接
+bash
+python client.py
+
+项目结构
+text
+chatlili/
+├── hall.py          # 大厅服务：管理所有聊天服务器注册
+├── server.py        # 聊天服务器：处理具体聊天房间和消息
+├── client.py        # 客户端示例：命令行聊天客户端
+└── README.md        # 项目文档
+
+API接口
+大厅服务 (hall.py)
+接口	方法	功能
+/register	POST	聊天服务器注册到大厅
+/get_servers	GET	获取所有可用聊天服务器
+/heartbeat	POST	服务器心跳保持
+聊天服务器 (server.py)
+接口	方法	功能
+/create_room	POST	创建新聊天房间
+/join_room	POST	加入指定房间
+/leave_room	POST	离开房间
+/rooms	GET	获取房间列表
+WebSocket	-	实时消息通信
+使用示例
+创建房间
+
+python
+# 客户端发送创建房间请求
+{
+    "room_name": "闲聊群",
+    "username": "张三"
+}
+加入房间
+
+python
+# 客户端发送加入房间请求
+{
+    "room_id": "room_12345",
+    "username": "李四"
+}
+发送消息
+
+python
+# 通过WebSocket发送消息
+socketio.emit('message', {
+    "room_id": "room_12345",
+    "username": "张三",
+    "content": "大家好！"
+})
+
+已知问题
+断线重连机制不够完善
+
+某些场景下消息可能重复发送
+
+服务器异常退出时房间清理不彻底
+
+并发场景下可能存在资源竞争
+
+WebSocket连接有时会意外断开
+
+免责声明
+本项目仅用于学习和演示目的，不建议在生产环境中使用。由于作者精力有限（懒），代码中存在大量未修复的bug，欢迎有兴趣的可以fork并自行改进。
+
+License
+MIT
+
