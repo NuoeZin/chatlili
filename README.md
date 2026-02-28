@@ -1,14 +1,5 @@
 # chatlili
 
-![Python version](https://img.shields.io/badge/python-3.6+-blue.svg)
-![Flask](https://img.shields.io/badge/flask-2.0+-green.svg)
-![License](https://img.shields.io/badge/license-MIT-red.svg)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/yourusername/chatlili/pulls)
-
-[![Discord](https://img.shields.io/discord/xxxxxxxxxx?label=Discord&logo=discord&color=5865F2)](https://discord.gg/example)
-[![Telegram](https://img.shields.io/badge/Telegram-join-blue?logo=telegram)](https://t.me/chatlili)
-[![Twitter](https://img.shields.io/twitter/follow/chatlili?style=social)](https://twitter.com/chatlili)
-
 **Python网页简易chat服务器分布模式大厅注册聊天厅服务包**
 
 > 🐛 bug闷多，懒得再改了
