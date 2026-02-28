@@ -31,6 +31,8 @@ python server.py
 
 聊天服务器默认运行在 http://localhost:8765
 
+（当然chat服务器指向的lobby服务器地址可以改，这要看你的lobby服务器的ip地址了）
+
 
 ## 已知问题
 
